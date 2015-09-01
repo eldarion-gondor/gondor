@@ -17,7 +17,7 @@ import (
 	"github.com/pivotal-golang/bytefmt"
 )
 
-var buildSHA string
+var version string
 var app *cli.App
 
 type versionInfo struct {
@@ -45,7 +45,7 @@ func stdCmd(cmdFunc func(*cli.Context)) func(*cli.Context) {
 func main() {
 	app = cli.NewApp()
 	app.Name = "gondor"
-	app.Version = fmt.Sprintf("0.1.0-%s", buildSHA)
+	app.Version = version
 	app.Author = "Eldarion, Inc."
 	app.Email = "development@eldarion.com"
 	app.Usage = "command-line tool for interacting with the Gondor API"
