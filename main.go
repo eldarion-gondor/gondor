@@ -125,7 +125,7 @@ func main() {
 						if len(ctx.Args()) > 0 {
 							return
 						}
-						api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+						api := getAPIClient(ctx)
 						resourceGroup := getResourceGroup(ctx, api)
 						sites, err := api.Sites.List(resourceGroup)
 						if err != nil {
@@ -202,7 +202,7 @@ func main() {
 						if len(ctx.Args()) > 0 {
 							return
 						}
-						api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+						api := getAPIClient(ctx)
 						resourceGroup := getResourceGroup(ctx, api)
 						keypairs, err := api.KeyPairs.List(resourceGroup)
 						if err != nil {
@@ -239,7 +239,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -254,7 +254,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -272,7 +272,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -293,7 +293,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					for j := range site.Instances[i].Services {
@@ -310,7 +310,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					for j := range site.Instances[i].Services {
@@ -328,7 +328,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -343,7 +343,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -366,7 +366,7 @@ func main() {
 						if len(ctx.Args()) > 0 {
 							return
 						}
-						api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+						api := getAPIClient(ctx)
 						site := getSite(ctx, api)
 						for i := range site.Instances {
 							fmt.Println(site.Instances[i].Label)
@@ -381,7 +381,7 @@ func main() {
 						if len(ctx.Args()) > 0 {
 							return
 						}
-						api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+						api := getAPIClient(ctx)
 						site := getSite(ctx, api)
 						for i := range site.Instances {
 							fmt.Println(site.Instances[i].Label)
@@ -396,7 +396,7 @@ func main() {
 						if len(ctx.Args()) > 0 {
 							return
 						}
-						api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+						api := getAPIClient(ctx)
 						site := getSite(ctx, api)
 						for i := range site.Instances {
 							fmt.Println(site.Instances[i].Label)
@@ -423,7 +423,7 @@ func main() {
 						if len(ctx.Args()) > 0 {
 							return
 						}
-						api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+						api := getAPIClient(ctx)
 						site := getSite(ctx, api)
 						for i := range site.Instances {
 							fmt.Println(site.Instances[i].Label)
@@ -440,7 +440,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -455,7 +455,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -480,7 +480,7 @@ func main() {
 				if len(ctx.Args()) > 0 {
 					return
 				}
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				for i := range site.Instances {
 					fmt.Println(site.Instances[i].Label)
@@ -495,7 +495,7 @@ func main() {
 			Usage: "[site] view metrics for a given service",
 			Action: stdCmd(func(ctx *cli.Context) {
 				MustLoadSiteConfig()
-				api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				if len(ctx.Args()) != 1 {
 					fatal("missing service")
@@ -568,6 +568,17 @@ func main() {
 		fatal(err.Error())
 	}
 	app.Run(os.Args)
+}
+
+func getAPIClient(ctx *cli.Context) *gondor.Client {
+	if !gcfg.loaded || gcfg.ClientOpts.ID == "" {
+		gcfg.SetClientOpts(&gondor.ClientOpts{
+			ID:      "KtcICiPMAII8FAeArUoDB97zmjqltllyUDev8HOS",
+			BaseURL: ctx.GlobalString("api-url"),
+		})
+	}
+	api := gondor.NewClient(gcfg.GetClientOpts())
+	return api
 }
 
 func checkVersion() {

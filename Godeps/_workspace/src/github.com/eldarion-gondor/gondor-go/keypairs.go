@@ -23,16 +23,12 @@ type KeyPair struct {
 
 func (r *KeyPairResource) findOne(url *url.URL) (*KeyPair, error) {
 	var res *KeyPair
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
+	resp, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
-	if resp.Status() == 404 {
+	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("keypair not found")
-	}
-	err = respError(resp, nil)
-	if err != nil {
-		return nil, err
 	}
 	res.r = r
 	return res, nil
@@ -57,11 +53,7 @@ func (r *KeyPairResource) List(resourceGroup *ResourceGroup) ([]*KeyPair, error)
 	}
 	url.RawQuery = q.Encode()
 	var res []*KeyPair
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, nil)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -70,12 +62,7 @@ func (r *KeyPairResource) List(resourceGroup *ResourceGroup) ([]*KeyPair, error)
 
 func (r *KeyPairResource) Create(keypair *KeyPair) error {
 	url := r.client.buildBaseURL("keypairs/")
-	var errors ErrorList
-	resp, err := r.client.Session.Post(url.String(), keypair, keypair, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	_, err := r.client.Post(url, keypair, keypair)
 	if err != nil {
 		return err
 	}
@@ -86,12 +73,8 @@ func (r *KeyPairResource) Delete(keypair *KeyPair) error {
 	if keypair.URL == "" {
 		return errors.New("missing keypair URL")
 	}
-	var errList ErrorList
-	resp, err := r.client.Session.Delete(keypair.URL, nil, &errList)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errList)
+	u, _ := url.Parse(keypair.URL)
+	_, err := r.client.Delete(u, nil)
 	if err != nil {
 		return err
 	}

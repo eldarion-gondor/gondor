@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 )
 
 func restartCmd(ctx *cli.Context) {
@@ -26,7 +25,7 @@ func restartCmd(ctx *cli.Context) {
 	} else {
 		usage(fmt.Sprintf("%q is not a service identifier", ctx.Args()[0]))
 	}
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	instance, err := api.Instances.Get(site, instanceLabel)
 	if err != nil {

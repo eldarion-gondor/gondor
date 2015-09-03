@@ -12,7 +12,7 @@ import (
 )
 
 func keypairsListCmd(ctx *cli.Context) {
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 
 	keypairs, err := api.KeyPairs.List(resourceGroup)
@@ -52,7 +52,7 @@ func keypairsCreateCmd(ctx *cli.Context) {
 		usage("--name is required")
 	}
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 
 	privateKeyPath := ctx.Args()[0]
@@ -92,7 +92,7 @@ func keypairsAttachCmd(ctx *cli.Context) {
 		usage("--service is required")
 	}
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 	site := getSite(ctx, api)
 
@@ -140,7 +140,7 @@ func keypairsDetachCmd(ctx *cli.Context) {
 		usage("--service is required")
 	}
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 
 	var instanceLabel, serviceName string
@@ -179,7 +179,7 @@ func keypairsDeleteCmd(ctx *cli.Context) {
 		usage("too few arguments")
 	}
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 
 	keypair, err := api.KeyPairs.GetByName(ctx.Args()[0], resourceGroup)

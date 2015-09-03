@@ -2,7 +2,7 @@ package gondor
 
 import (
 	"errors"
-	"fmt"
+	"net/url"
 )
 
 type ReleaseResource struct {
@@ -18,16 +18,11 @@ type Release struct {
 }
 
 func (r *ReleaseResource) Create(instance *Instance) (*Release, error) {
-	url := fmt.Sprintf("%s/v2/releases/", r.client.BaseURL)
+	url := r.client.buildBaseURL("releases/")
 	release := Release{
 		Instance: *instance,
 	}
-	var errors ErrorList
-	resp, err := r.client.Session.Post(url, &release, &release, &errors)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, &errors)
+	_, err := r.client.Post(url, &release, &release)
 	if err != nil {
 		return nil, err
 	}
@@ -38,12 +33,8 @@ func (r *ReleaseResource) Delete(release *Release) error {
 	if release.URL == "" {
 		return errors.New("missing release URL")
 	}
-	var errList ErrorList
-	resp, err := r.client.Session.Delete(release.URL, nil, &errList)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errList)
+	u, _ := url.Parse(release.URL)
+	_, err := r.client.Delete(u, nil)
 	if err != nil {
 		return err
 	}

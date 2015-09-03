@@ -20,11 +20,7 @@ func (r *LogResource) ListByInstance(instance *Instance, lines int) ([]*LogRecor
 	q.Add("size", strconv.Itoa(lines))
 	url.RawQuery = q.Encode()
 	var res []*LogRecord
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, nil)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -38,11 +34,7 @@ func (r *LogResource) ListByService(service *Service, lines int) ([]*LogRecord, 
 	q.Add("size", strconv.Itoa(lines))
 	url.RawQuery = q.Encode()
 	var res []*LogRecord
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, nil)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}

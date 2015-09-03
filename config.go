@@ -6,14 +6,21 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/eldarion-gondor/gondor-go"
+
 	"gopkg.in/yaml.v2"
 )
 
 type GlobalConfig struct {
-	Auth struct {
-		Username    string `yaml:"username,omitempty"`
-		AccessToken string `yaml:"access_token,omitempty"`
-	} `yaml:"auth,omitempty"`
+	ClientOpts struct {
+		ID      string `yaml:"id,omitempty"`
+		BaseURL string `yaml:"base_url,omitempty"`
+		Auth    struct {
+			Username     string `yaml:"username,omitempty"`
+			AccessToken  string `yaml:"access_token,omitempty"`
+			RefreshToken string `yaml:"refresh_token,omitempty"`
+		} `yaml:"auth,omitempty"`
+	} `yaml:"client,omitempty"`
 	loaded   bool
 	filename string
 }
@@ -35,6 +42,24 @@ func LoadGlobalConfig(filename string) error {
 	}
 	gcfg.loaded = true
 	return nil
+}
+
+func (cfg *GlobalConfig) GetClientOpts() *gondor.ClientOpts {
+	opts := gondor.ClientOpts{}
+	opts.ID = cfg.ClientOpts.ID
+	opts.BaseURL = cfg.ClientOpts.BaseURL
+	opts.Auth.Username = cfg.ClientOpts.Auth.Username
+	opts.Auth.AccessToken = cfg.ClientOpts.Auth.AccessToken
+	opts.Auth.RefreshToken = cfg.ClientOpts.Auth.RefreshToken
+	return &opts
+}
+
+func (cfg *GlobalConfig) SetClientOpts(opts *gondor.ClientOpts) {
+	cfg.ClientOpts.ID = opts.ID
+	cfg.ClientOpts.BaseURL = opts.BaseURL
+	cfg.ClientOpts.Auth.Username = opts.Auth.Username
+	cfg.ClientOpts.Auth.AccessToken = opts.Auth.AccessToken
+	cfg.ClientOpts.Auth.RefreshToken = opts.Auth.RefreshToken
 }
 
 func (cfg *GlobalConfig) Save() error {

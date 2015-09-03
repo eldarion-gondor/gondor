@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 )
 
 func deleteCmd(ctx *cli.Context) {
@@ -26,7 +25,7 @@ func deleteCmd(ctx *cli.Context) {
 	} else {
 		instanceLabel = arg
 	}
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	if instanceLabel != "" && serviceName == "" {
 		instance, err := api.Instances.Get(site, instanceLabel)

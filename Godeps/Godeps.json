@@ -13,7 +13,7 @@
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/gondor-go",
-			"Rev": "1f90c9f8e98e415faade46a478299c8d1942664f"
+			"Rev": "74514de2c7f24bc332086cfb0313ce7b3ea53d22"
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/piper",
@@ -26,11 +26,6 @@
 		{
 			"ImportPath": "github.com/inconshreveable/go-update",
 			"Rev": "f848a144bdfc3d6dc7669d4b026ecc7a42ed4575"
-		},
-		{
-			"ImportPath": "github.com/jmcvetta/napping",
-			"Comment": "v1",
-			"Rev": "2d97c78f6d03e78ba167e2a252e578014c7769f9"
 		},
 		{
 			"ImportPath": "github.com/kardianos/osext",

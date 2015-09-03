@@ -4,12 +4,11 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 	"github.com/olekukonko/tablewriter"
 )
 
 func resourceGroupListCmd(ctx *cli.Context) {
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	resourceGroups, err := api.ResourceGroups.List()
 	if err != nil {
 		fatal(err.Error())

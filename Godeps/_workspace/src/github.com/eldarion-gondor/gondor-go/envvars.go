@@ -20,11 +20,7 @@ type EnvironmentVariable struct {
 
 func (r *EnvironmentVariableResource) findMany(url *url.URL) ([]*EnvironmentVariable, error) {
 	var res []*EnvironmentVariable
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, nil)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -36,16 +32,7 @@ func (r *EnvironmentVariableResource) findMany(url *url.URL) ([]*EnvironmentVari
 
 func (r *EnvironmentVariableResource) Create(envVars []*EnvironmentVariable) error {
 	url := r.client.buildBaseURL("envvars/")
-	var errors []ErrorList
-	resp, err := r.client.Session.Post(url.String(), envVars, &envVars, &errors)
-	if err != nil {
-		return err
-	}
-	var resErrors ErrorList
-	if len(errors) > 0 {
-		resErrors = errors[0]
-	}
-	err = respError(resp, &resErrors)
+	_, err := r.client.Post(url, envVars, &envVars)
 	if err != nil {
 		return err
 	}

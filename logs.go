@@ -26,7 +26,7 @@ func logsCmd(ctx *cli.Context) {
 	var service *gondor.Service
 	var instanceLabel, serviceName string
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site = getSite(ctx, api)
 
 	if len(ctx.Args()) >= 1 {

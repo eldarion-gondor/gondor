@@ -1,9 +1,6 @@
 package gondor
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 type DeploymentResource struct {
 	client *Client
@@ -18,17 +15,12 @@ type Deployment struct {
 }
 
 func (r *DeploymentResource) Create(instance *Instance, release *Release) (*Deployment, error) {
-	url := fmt.Sprintf("%s/v2/deployments/", r.client.BaseURL)
+	url := r.client.buildBaseURL("deployments/")
 	deployment := Deployment{
 		Instance: instance,
 		Release:  *release,
 	}
-	var errors ErrorList
-	resp, err := r.client.Session.Post(url, &deployment, &deployment, &errors)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, &errors)
+	_, err := r.client.Post(url, &deployment, &deployment)
 	if err != nil {
 		return nil, err
 	}

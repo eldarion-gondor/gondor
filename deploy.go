@@ -6,7 +6,6 @@ import (
 	"os/exec"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 )
 
 func deployCmd(ctx *cli.Context) {
@@ -21,7 +20,7 @@ func deployCmd(ctx *cli.Context) {
 	label := ctx.Args()[0]
 	source := ctx.Args()[1]
 	// 0. prepare API
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	instance, err := api.Instances.Get(site, label)
 	if err != nil {

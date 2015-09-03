@@ -26,29 +26,20 @@ type Instance struct {
 
 func (r *InstanceResource) findOne(url *url.URL) (*Instance, error) {
 	var res *Instance
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
+	resp, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
-	if resp.Status() == 404 {
+	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("instance not found")
-	}
-	err = respError(resp, nil)
-	if err != nil {
-		return nil, err
 	}
 	res.r = r
 	return res, nil
 }
 
 func (r *InstanceResource) Create(instance *Instance) error {
-	url := fmt.Sprintf("%s/v2/instances/", r.client.BaseURL)
-	var errors ErrorList
-	resp, err := r.client.Session.Post(url, instance, instance, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	url := r.client.buildBaseURL("instances/")
+	_, err := r.client.Post(url, instance, instance)
 	if err != nil {
 		return err
 	}
@@ -76,12 +67,8 @@ func (r *InstanceResource) Delete(instance *Instance) error {
 	if instance.URL == "" {
 		return errors.New("missing instance URL")
 	}
-	var errList ErrorList
-	resp, err := r.client.Session.Delete(instance.URL, nil, &errList)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errList)
+	u, _ := url.Parse(instance.URL)
+	_, err := r.client.Delete(u, nil)
 	if err != nil {
 		return err
 	}
@@ -98,8 +85,7 @@ func (i *Instance) Load() error {
 }
 
 func (i *Instance) Run(mode string, cmd []string) (string, error) {
-	url := i.URL + "run/"
-	var errList ErrorList
+	u, _ := url.Parse(i.URL + "run/")
 	up := struct {
 		Mode    string `json:"mode,omitempty"`
 		Command string `json:"command,omitempty"`
@@ -110,8 +96,7 @@ func (i *Instance) Run(mode string, cmd []string) (string, error) {
 	down := struct {
 		Endpoint string `json:"endpoint"`
 	}{}
-	resp, err := i.r.client.Session.Post(url, &up, &down, &errList)
-	err = respError(resp, &errList)
+	_, err := i.r.client.Post(u, &up, &down)
 	if err != nil {
 		return "", err
 	}

@@ -1,19 +1,25 @@
 package gondor
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-
-	"github.com/jmcvetta/napping"
 )
 
-type Client struct {
-	BaseURL     string
-	AccessToken string
+type ClientOpts struct {
+	ID      string
+	BaseURL string
+	Auth    struct {
+		Username     string
+		AccessToken  string
+		RefreshToken string
+	}
+}
 
-	Session *napping.Session
+type Client struct {
+	opts *ClientOpts
+
+	httpClient *http.Client
 
 	ResourceGroups *ResourceGroupResource
 	Sites          *SiteResource
@@ -29,22 +35,13 @@ type Client struct {
 	Metrics        *MetricResource
 }
 
-func NewClient(baseURL string, accessToken string) *Client {
+func NewClient(opts *ClientOpts) *Client {
 	c := &Client{
-		BaseURL:     baseURL,
-		AccessToken: accessToken,
+		opts:       opts,
+		httpClient: http.DefaultClient,
 	}
-	c.setupSession()
 	c.attachResources()
 	return c
-}
-
-func (c *Client) setupSession() {
-	c.Session = &napping.Session{
-		Client: http.DefaultClient,
-		Header: &http.Header{},
-	}
-	c.Session.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
 }
 
 func (c *Client) attachResources() {
@@ -63,30 +60,10 @@ func (c *Client) attachResources() {
 }
 
 func (c *Client) buildBaseURL(endpoint string) *url.URL {
-	url, err := url.Parse(c.BaseURL)
+	url, err := url.Parse(c.opts.BaseURL)
 	if err != nil {
 		panic(fmt.Sprintf("bad base URL: %s", err.Error()))
 	}
 	url.Path = fmt.Sprintf("v2/%s", endpoint)
 	return url
-}
-
-func respError(resp *napping.Response, errs *ErrorList) error {
-	switch resp.Status() {
-	case 200, 201, 204:
-		return nil
-	case 401:
-		return errors.New("unauthorized")
-	case 400:
-		if errs == nil {
-			return errors.New("got 400 with no error list")
-		}
-		return apiError{errList: *errs}
-	case 500:
-		return fmt.Errorf("server error\nOur staff has been notified of this error. Please try again later.")
-	case 502:
-		return fmt.Errorf("bad gateway\nOur staff has been notified of this error. Please try again later.")
-	default:
-		return fmt.Errorf("got unknown response: %d", resp.Status())
-	}
 }

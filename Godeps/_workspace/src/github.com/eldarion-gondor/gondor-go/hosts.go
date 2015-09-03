@@ -1,9 +1,6 @@
 package gondor
 
-import (
-	"fmt"
-	"net/url"
-)
+import "net/url"
 
 type HostNameResource struct {
 	client *Client
@@ -19,13 +16,8 @@ type HostName struct {
 }
 
 func (r *HostNameResource) Create(hostName *HostName) error {
-	url := fmt.Sprintf("%s/v2/hosts/", r.client.BaseURL)
-	var errors ErrorList
-	resp, err := r.client.Session.Post(url, hostName, hostName, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	url := r.client.buildBaseURL("hosts/")
+	_, err := r.client.Post(url, hostName, hostName)
 	if err != nil {
 		return err
 	}
@@ -37,24 +29,21 @@ func (r *HostNameResource) List(instance *Instance) ([]*HostName, error) {
 	if instance != nil {
 		v.Add("instance", instance.URL)
 	}
-	url := fmt.Sprintf("%s/v2/hosts/", r.client.BaseURL)
-	if len(v) > 0 {
-		url += "?" + v.Encode()
+	url := r.client.buildBaseURL("hosts/")
+	q := url.Query()
+	if instance != nil {
+		q.Set("instance", instance.URL)
 	}
+	url.RawQuery = q.Encode()
 	var res []*HostName
-	resp, err := r.client.Session.Get(url, nil, &res, nil)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
-	switch resp.Status() {
-	case 200:
-		for i := range res {
-			res[i].r = r
-		}
-		return res, nil
-	default:
-		return nil, fmt.Errorf("got unknown response: %d", resp.Status())
+	for i := range res {
+		res[i].r = r
 	}
+	return res, nil
 }
 
 func (r *HostNameResource) Delete(hostName *HostName) error {
@@ -69,12 +58,8 @@ func (r *HostNameResource) Delete(hostName *HostName) error {
 			break
 		}
 	}
-	var errList ErrorList
-	resp, err := r.client.Session.Delete(foundHostName.URL, nil, &errList)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errList)
+	u, _ := url.Parse(foundHostName.URL)
+	_, err = r.client.Delete(u, nil)
 	if err != nil {
 		return err
 	}

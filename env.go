@@ -19,7 +19,7 @@ func envCmd(ctx *cli.Context) {
 	var displayEnvVars, desiredEnvVars []*gondor.EnvironmentVariable
 	var scope, instanceLabel, serviceName string
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site = getSite(ctx, api)
 
 	if len(ctx.Args()) >= 1 {

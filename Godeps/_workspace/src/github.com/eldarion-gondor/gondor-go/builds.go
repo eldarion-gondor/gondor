@@ -22,18 +22,13 @@ type Build struct {
 }
 
 func (r *BuildResource) Create(instance *Instance, release *Release) (*Build, error) {
-	url := fmt.Sprintf("%s/v2/builds/", r.client.BaseURL)
+	url := r.client.buildBaseURL("builds/")
 	build := Build{
 		Instance: instance,
 		Release:  *release,
 		r:        r,
 	}
-	var errors ErrorList
-	resp, err := r.client.Session.Post(url, &build, &build, &errors)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, &errors)
+	_, err := r.client.Post(url, &build, &build)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +56,7 @@ func (build *Build) Perform(blob io.Reader) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", build.r.client.AccessToken))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", build.r.client.opts.Auth.AccessToken))
 	req.Header.Add("Content-Type", "application/x-tar")
 	req.Header.Add("Content-Disposition", "attachment; filename=blob.tar")
 	fi, err := blobFile.Stat()

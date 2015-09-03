@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -19,7 +18,7 @@ func openCmd(ctx *cli.Context) {
 	}
 	instanceLabel := ctx.Args()[0]
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	instance, err := api.Instances.Get(site, instanceLabel)
 	if err != nil {

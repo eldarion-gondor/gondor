@@ -10,7 +10,7 @@ import (
 )
 
 func sitesListCmd(ctx *cli.Context) {
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 
 	var resourceGroup *gondor.ResourceGroup
 	var err error
@@ -42,7 +42,7 @@ func sitesCreateCmd(ctx *cli.Context) {
 	if len(ctx.Args()) == 1 {
 		name = ctx.Args()[0]
 	}
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 	site := gondor.Site{
 		ResourceGroup: resourceGroup,
@@ -62,7 +62,7 @@ func sitesDeleteCmd(ctx *cli.Context) {
 	if len(ctx.Args()) == 0 {
 		usage("too few arguments")
 	}
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 	var site *gondor.Site
 	site, err := api.Sites.Get(ctx.Args()[0], resourceGroup)

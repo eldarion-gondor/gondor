@@ -20,7 +20,7 @@ func createCmd(ctx *cli.Context) {
 	if len(ctx.Args()) > 1 {
 		instanceLabel = ctx.Args()[0]
 	}
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	if instanceLabel == "" {
 		instance := gondor.Instance{

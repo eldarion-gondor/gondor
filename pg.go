@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 )
 
 func pgRunCmd(ctx *cli.Context) {
@@ -18,7 +17,7 @@ func pgRunCmd(ctx *cli.Context) {
 		usage("too few arguments")
 	}
 	instanceLabel := ctx.Args()[0]
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	instance, err := api.Instances.Get(site, instanceLabel)
 	if err != nil {

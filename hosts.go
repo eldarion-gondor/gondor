@@ -20,7 +20,7 @@ func hostsListCmd(ctx *cli.Context) {
 	}
 	instanceLabel := ctx.Args()[0]
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	instance, err := api.Instances.Get(site, instanceLabel)
 	if err != nil {
@@ -55,7 +55,7 @@ func hostsCreateCmd(ctx *cli.Context) {
 	instanceLabel := ctx.Args()[0]
 	newHostName := ctx.Args()[1]
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	instance, err := api.Instances.Get(site, instanceLabel)
 	if err != nil {
@@ -84,7 +84,7 @@ func hostsDeleteCmd(ctx *cli.Context) {
 	instanceLabel := ctx.Args()[0]
 	newHostName := ctx.Args()[1]
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 
 	// lookup instance

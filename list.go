@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -15,7 +14,7 @@ func listCmd(ctx *cli.Context) {
 	if len(ctx.Args()) == 1 {
 		instanceLabel = ctx.Args()[0]
 	}
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	table := tablewriter.NewWriter(os.Stdout)
 	if instanceLabel == "" {

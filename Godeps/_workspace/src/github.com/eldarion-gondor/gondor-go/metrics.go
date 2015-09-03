@@ -16,11 +16,7 @@ func (r *MetricResource) List(service *Service) ([]*MetricSeries, error) {
 	q.Add("service", service.URL)
 	url.RawQuery = q.Encode()
 	var res []*MetricSeries
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = respError(resp, nil)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}

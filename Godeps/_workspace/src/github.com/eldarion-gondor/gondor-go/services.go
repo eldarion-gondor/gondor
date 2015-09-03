@@ -33,29 +33,20 @@ type Service struct {
 
 func (r *ServiceResource) findOne(url *url.URL) (*Service, error) {
 	var res *Service
-	resp, err := r.client.Session.Get(url.String(), nil, &res, nil)
+	resp, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
-	if resp.Status() == 404 {
+	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("service not found")
-	}
-	err = respError(resp, nil)
-	if err != nil {
-		return nil, err
 	}
 	res.r = r
 	return res, nil
 }
 
 func (r *ServiceResource) Create(service *Service) error {
-	url := fmt.Sprintf("%s/v2/services/", r.client.BaseURL)
-	var errors ErrorList
-	resp, err := r.client.Session.Post(url, service, service, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	url := r.client.buildBaseURL("services/")
+	_, err := r.client.Post(url, service, service)
 	if err != nil {
 		return err
 	}
@@ -80,14 +71,9 @@ func (r *ServiceResource) Get(instance *Instance, name string) (*Service, error)
 }
 
 func (r *ServiceResource) Update(service Service) error {
-	url := service.URL
+	u, _ := url.Parse(service.URL)
 	service.URL = ""
-	var errors ErrorList
-	resp, err := r.client.Session.Patch(url, &service, nil, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	_, err := r.client.Patch(u, &service, nil)
 	if err != nil {
 		return err
 	}
@@ -98,12 +84,8 @@ func (r *ServiceResource) Delete(service *Service) error {
 	if service.URL == "" {
 		return errors.New("missing service URL")
 	}
-	var errList ErrorList
-	resp, err := r.client.Session.Delete(service.URL, nil, &errList)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errList)
+	u, _ := url.Parse(service.URL)
+	_, err := r.client.Delete(u, nil)
 	if err != nil {
 		return err
 	}
@@ -118,12 +100,8 @@ func (s *Service) SetState(state string) error {
 	desiredService := Service{
 		DesiredState: state,
 	}
-	var errors ErrorList
-	resp, err := s.r.client.Session.Patch(s.URL, &desiredService, nil, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	u, _ := url.Parse(s.URL)
+	_, err := s.r.client.Patch(u, &desiredService, nil)
 	if err != nil {
 		return err
 	}
@@ -134,12 +112,8 @@ func (s *Service) SetReplicas(n int) error {
 	desiredService := Service{
 		DesiredReplicas: n,
 	}
-	var errors ErrorList
-	resp, err := s.r.client.Session.Patch(s.URL, &desiredService, nil, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	u, _ := url.Parse(s.URL)
+	_, err := s.r.client.Patch(u, &desiredService, nil)
 	if err != nil {
 		return err
 	}
@@ -150,12 +124,8 @@ func (s *Service) DetachKeyPair() error {
 	payload := struct {
 		KeyPair *KeyPair `json:"keypair"`
 	}{}
-	var errors ErrorList
-	resp, err := s.r.client.Session.Patch(s.URL, &payload, nil, &errors)
-	if err != nil {
-		return err
-	}
-	err = respError(resp, &errors)
+	u, _ := url.Parse(s.URL)
+	_, err := s.r.client.Patch(u, &payload, nil)
 	if err != nil {
 		return err
 	}

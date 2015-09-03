@@ -5,14 +5,13 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/eldarion-gondor/gondor-go"
 	"github.com/olekukonko/tablewriter"
 )
 
 func usersListCmd(ctx *cli.Context) {
 	MustLoadSiteConfig()
 
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 
 	table := tablewriter.NewWriter(os.Stdout)
@@ -36,7 +35,7 @@ func usersAddCmd(ctx *cli.Context) {
 		usage("too few arguments")
 	}
 	MustLoadSiteConfig()
-	api := gondor.NewClient(ctx.GlobalString("api-url"), gcfg.Auth.AccessToken)
+	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	if err := site.AddUser(ctx.Args()[0], ctx.String("role")); err != nil {
 		fatal(err.Error())
