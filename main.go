@@ -19,6 +19,7 @@ import (
 
 var version string
 var app *cli.App
+var api *gondor.Client
 
 type versionInfo struct {
 	Version     string
@@ -571,13 +572,15 @@ func main() {
 }
 
 func getAPIClient(ctx *cli.Context) *gondor.Client {
-	if !gcfg.loaded || gcfg.ClientOpts.ID == "" {
-		gcfg.SetClientOpts(&gondor.ClientOpts{
-			ID:      "KtcICiPMAII8FAeArUoDB97zmjqltllyUDev8HOS",
-			BaseURL: ctx.GlobalString("api-url"),
-		})
+	if api == nil {
+		if !gcfg.loaded || gcfg.ClientOpts.ID == "" {
+			gcfg.SetClientOpts(&gondor.ClientOpts{
+				ID:      "KtcICiPMAII8FAeArUoDB97zmjqltllyUDev8HOS",
+				BaseURL: ctx.GlobalString("api-url"),
+			})
+		}
+		api = gondor.NewClient(gcfg.GetClientOpts())
 	}
-	api := gondor.NewClient(gcfg.GetClientOpts())
 	return api
 }
 
