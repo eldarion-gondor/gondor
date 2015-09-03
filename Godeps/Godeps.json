@@ -1,9 +1,6 @@
 {
 	"ImportPath": "github.com/eldarion-gondor/cli",
 	"GoVersion": "go1.5",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/bgentry/speakeasy",
@@ -13,6 +10,10 @@
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-137-gbca61c4",
 			"Rev": "bca61c476e3c752594983e4c9bcd5f62fb09f157"
+		},
+		{
+			"ImportPath": "github.com/eldarion-gondor/gondor-go",
+			"Rev": "1f90c9f8e98e415faade46a478299c8d1942664f"
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/piper",

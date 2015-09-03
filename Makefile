@@ -5,16 +5,16 @@ guard-%:
 	fi
 
 build:
-	godep go install -a -ldflags "-X main.version=0.0.0-dev" ./cmd/gondor
+	godep go build -a -ldflags "-X main.version=0.0.0-dev" -o bin/gondor
 
 bin/gondor-linux-amd64:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -ldflags "-X main.version=$(VERSION)" -o bin/gondor-linux-amd64 ./cmd/gondor
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 godep go build -ldflags "-X main.version=$(VERSION)" -o bin/gondor-linux-amd64
 
 bin/gondor-darwin-amd64:
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 godep go build -ldflags "-X main.version=$(VERSION)" -o bin/gondor-darwin-amd64 ./cmd/gondor
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 godep go build -ldflags "-X main.version=$(VERSION)" -o bin/gondor-darwin-amd64
 
 bin/gondor-windows-amd64.exe:
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 godep go build -ldflags "-X main.version=$(VERSION)" -o bin/gondor-windows-amd64.exe ./cmd/gondor
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 godep go build -ldflags "-X main.version=$(VERSION)" -o bin/gondor-windows-amd64.exe
 
 cross-build: guard-VERSION bin/gondor-linux-amd64 bin/gondor-darwin-amd64 bin/gondor-windows-amd64.exe
 
