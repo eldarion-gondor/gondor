@@ -19,9 +19,9 @@ bin/gondor-windows-amd64.exe:
 cross-build: guard-VERSION bin/gondor-linux-amd64 bin/gondor-darwin-amd64 bin/gondor-windows-amd64.exe
 
 release: guard-VERSION cross-build
-	gsutil cp -a public-read bin/bin/gondor-linux-amd64 gs://gondor-dist/bin/gondor-v$(VERSION)-linux-amd64
-	gsutil cp -a public-read bin/bin/gondor-darwin-amd64 gs://gondor-dist/bin/gondor-v$(VERSION)-darwin-amd64
-	gsutil cp -a public-read bin/bin/gondor-windows-amd64.exe gs://gondor-dist/bin/gondor-v$(VERSION)-windows-amd64.exe
+	gsutil cp -a public-read ./bin/gondor-linux-amd64 gs://gondor-cli/gondor-v$(VERSION)-linux-amd64
+	gsutil cp -a public-read ./bin/gondor-darwin-amd64 gs://gondor-cli/gondor-v$(VERSION)-darwin-amd64
+	gsutil cp -a public-read ./bin/gondor-windows-amd64.exe gs://gondor-cli/gondor-v$(VERSION)-windows-amd64.exe
 
 clean:
 	rm -rf bin/
