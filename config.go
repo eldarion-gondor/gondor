@@ -44,6 +44,18 @@ func LoadGlobalConfig(filename string) error {
 	return nil
 }
 
+type clientOptsPersister struct {
+	cfg *GlobalConfig
+}
+
+func (p *clientOptsPersister) Persist(opts *gondor.ClientOpts) error {
+	p.cfg.SetClientOpts(opts)
+	if err := p.cfg.Save(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (cfg *GlobalConfig) GetClientOpts() *gondor.ClientOpts {
 	opts := gondor.ClientOpts{}
 	opts.ID = cfg.ClientOpts.ID
@@ -51,6 +63,7 @@ func (cfg *GlobalConfig) GetClientOpts() *gondor.ClientOpts {
 	opts.Auth.Username = cfg.ClientOpts.Auth.Username
 	opts.Auth.AccessToken = cfg.ClientOpts.Auth.AccessToken
 	opts.Auth.RefreshToken = cfg.ClientOpts.Auth.RefreshToken
+	opts.Persister = &clientOptsPersister{cfg: cfg}
 	return &opts
 }
 

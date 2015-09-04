@@ -23,14 +23,11 @@ func loginCmd(ctx *cli.Context) {
 	// ask for password safely
 	var password string
 	password, err := speakeasy.Ask("Password: ")
-	// authenticate user against identity
-	opts, err := api.Authenticate(username, password)
 	if err != nil {
 		fatal(err.Error())
 	}
-	// persist client opts
-	gcfg.SetClientOpts(opts)
-	if err := gcfg.Save(); err != nil {
+	// authenticate user against identity
+	if err := api.Authenticate(username, password); err != nil {
 		fatal(err.Error())
 	}
 	// notify user
@@ -42,13 +39,7 @@ func logoutCmd(ctx *cli.Context) {
 		fatal("you are already logged out.")
 	}
 	api := getAPIClient(ctx)
-	opts, err := api.RevokeAccess()
-	if err != nil {
-		fatal(err.Error())
-	}
-	// persist client opts
-	gcfg.SetClientOpts(opts)
-	if err := gcfg.Save(); err != nil {
+	if err := api.RevokeAccess(); err != nil {
 		fatal(err.Error())
 	}
 	success("you have been logged out")
