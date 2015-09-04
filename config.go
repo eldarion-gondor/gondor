@@ -12,7 +12,7 @@ import (
 )
 
 type GlobalConfig struct {
-	client struct {
+	Client struct {
 		ID          string `yaml:"id,omitempty"`
 		BaseURL     string `yaml:"base_url,omitempty"`
 		IdentityURL string `yaml:"identity_url,omitempty"`
@@ -59,27 +59,27 @@ func (p *clientConfigPersister) Persist(config *gondor.Config) error {
 
 func (cfg *GlobalConfig) GetClientConfig() *gondor.Config {
 	config := gondor.Config{}
-	config.ID = cfg.client.ID
-	config.BaseURL = cfg.client.BaseURL
-	config.IdentityURL = cfg.client.IdentityURL
-	config.Auth.Username = cfg.client.Auth.Username
-	config.Auth.AccessToken = cfg.client.Auth.AccessToken
-	config.Auth.RefreshToken = cfg.client.Auth.RefreshToken
+	config.ID = cfg.Client.ID
+	config.BaseURL = cfg.Client.BaseURL
+	config.IdentityURL = cfg.Client.IdentityURL
+	config.Auth.Username = cfg.Client.Auth.Username
+	config.Auth.AccessToken = cfg.Client.Auth.AccessToken
+	config.Auth.RefreshToken = cfg.Client.Auth.RefreshToken
 	config.Persister = &clientConfigPersister{cfg: cfg}
 	return &config
 }
 
 func (cfg *GlobalConfig) SetClientConfig(config *gondor.Config) {
-	cfg.client.ID = config.ID
-	cfg.client.BaseURL = config.BaseURL
-	cfg.client.IdentityURL = config.IdentityURL
-	cfg.client.Auth.Username = config.Auth.Username
-	cfg.client.Auth.AccessToken = config.Auth.AccessToken
-	cfg.client.Auth.RefreshToken = config.Auth.RefreshToken
+	cfg.Client.ID = config.ID
+	cfg.Client.BaseURL = config.BaseURL
+	cfg.Client.IdentityURL = config.IdentityURL
+	cfg.Client.Auth.Username = config.Auth.Username
+	cfg.Client.Auth.AccessToken = config.Auth.AccessToken
+	cfg.Client.Auth.RefreshToken = config.Auth.RefreshToken
 }
 
 func (cfg *GlobalConfig) Save() error {
-	data, err := yaml.Marshal(&gcfg)
+	data, err := yaml.Marshal(cfg)
 	if err != nil {
 		return err
 	}

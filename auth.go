@@ -8,12 +8,12 @@ import (
 )
 
 func isAuthenticated() bool {
-	return gcfg.loaded && gcfg.client.Auth.AccessToken != ""
+	return gcfg.loaded && gcfg.Client.Auth.AccessToken != ""
 }
 
 func loginCmd(ctx *cli.Context) {
 	if isAuthenticated() {
-		fatal(fmt.Sprintf("you are already logged in as %s. To log out run `gondor logout`", gcfg.client.Auth.Username))
+		fatal(fmt.Sprintf("you are already logged in as %s. To log out run `gondor logout`", gcfg.Client.Auth.Username))
 	}
 	api := getAPIClient(ctx)
 	// ask for username

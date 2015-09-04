@@ -573,7 +573,7 @@ func main() {
 
 func getAPIClient(ctx *cli.Context) *gondor.Client {
 	if api == nil {
-		if !gcfg.loaded || gcfg.client.ID == "" {
+		if !gcfg.loaded || gcfg.Client.ID == "" {
 			gcfg.SetClientConfig(&gondor.Config{
 				ID:          "KtcICiPMAII8FAeArUoDB97zmjqltllyUDev8HOS",
 				BaseURL:     ctx.GlobalString("api-url"),
