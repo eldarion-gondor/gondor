@@ -12,7 +12,8 @@ import (
 )
 
 type GlobalConfig struct {
-	Client struct {
+	Version string `yaml:"version,omitempty"`
+	Client  struct {
 		ID          string `yaml:"id,omitempty"`
 		BaseURL     string `yaml:"base_url,omitempty"`
 		IdentityURL string `yaml:"identity_url,omitempty"`
@@ -31,18 +32,34 @@ var gcfg GlobalConfig
 func LoadGlobalConfig(filename string) error {
 	gcfg.filename = filename
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		gcfg.Version = "1"
 		return nil
 	}
+	cfg, err := ReadGlobalConfig(filename)
+	if err != nil {
+		return err
+	}
+	if cfg.Version != "1" {
+		return fmt.Errorf("global config must be v1. Delete %q and log in again.", filename)
+	}
+	cfg.loaded = true
+	gcfg = *cfg
+	return nil
+}
+
+func ReadGlobalConfig(filename string) (*GlobalConfig, error) {
+	var cfg GlobalConfig
+	cfg.filename = filename
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	err = yaml.Unmarshal(data, &gcfg)
+	err = yaml.Unmarshal(data, &cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	gcfg.loaded = true
-	return nil
+	cfg.loaded = true
+	return &cfg, nil
 }
 
 type clientConfigPersister struct {
