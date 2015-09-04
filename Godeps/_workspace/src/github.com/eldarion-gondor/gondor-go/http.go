@@ -18,7 +18,7 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 	}
 	var err error
 	header := http.Header{}
-	header.Add("Authorization", fmt.Sprintf("Bearer %s", c.opts.Auth.AccessToken))
+	header.Add("Authorization", fmt.Sprintf("Bearer %s", c.cfg.Auth.AccessToken))
 	var body io.Reader
 	if payload != nil {
 		var b []byte

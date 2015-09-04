@@ -6,11 +6,11 @@ import (
 	"net/url"
 )
 
-type ClientOptsPersister interface {
-	Persist(*ClientOpts) error
+type ConfigPersister interface {
+	Persist(*Config) error
 }
 
-type ClientOpts struct {
+type Config struct {
 	ID          string
 	BaseURL     string
 	IdentityURL string
@@ -19,15 +19,15 @@ type ClientOpts struct {
 		AccessToken  string
 		RefreshToken string
 	}
-	Persister ClientOptsPersister
+	Persister ConfigPersister
 }
 
-func (opts *ClientOpts) Persist() error {
-	return opts.Persister.Persist(opts)
+func (cfg *Config) Persist() error {
+	return cfg.Persister.Persist(cfg)
 }
 
 type Client struct {
-	opts *ClientOpts
+	cfg *Config
 
 	httpClient *http.Client
 
@@ -45,9 +45,9 @@ type Client struct {
 	Metrics        *MetricResource
 }
 
-func NewClient(opts *ClientOpts) *Client {
+func NewClient(cfg *Config) *Client {
 	c := &Client{
-		opts:       opts,
+		cfg:        cfg,
 		httpClient: http.DefaultClient,
 	}
 	c.attachResources()
@@ -70,7 +70,7 @@ func (c *Client) attachResources() {
 }
 
 func (c *Client) buildBaseURL(endpoint string) *url.URL {
-	url, err := url.Parse(c.opts.BaseURL)
+	url, err := url.Parse(c.cfg.BaseURL)
 	if err != nil {
 		panic(fmt.Sprintf("bad base URL: %s", err.Error()))
 	}

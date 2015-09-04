@@ -56,7 +56,7 @@ func (build *Build) Perform(blob io.Reader) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", build.r.client.opts.Auth.AccessToken))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", build.r.client.cfg.Auth.AccessToken))
 	req.Header.Add("Content-Type", "application/x-tar")
 	req.Header.Add("Content-Disposition", "attachment; filename=blob.tar")
 	fi, err := blobFile.Stat()

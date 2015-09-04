@@ -12,7 +12,7 @@ import (
 )
 
 type GlobalConfig struct {
-	ClientOpts struct {
+	client struct {
 		ID          string `yaml:"id,omitempty"`
 		BaseURL     string `yaml:"base_url,omitempty"`
 		IdentityURL string `yaml:"identity_url,omitempty"`
@@ -45,37 +45,37 @@ func LoadGlobalConfig(filename string) error {
 	return nil
 }
 
-type clientOptsPersister struct {
+type clientConfigPersister struct {
 	cfg *GlobalConfig
 }
 
-func (p *clientOptsPersister) Persist(opts *gondor.ClientOpts) error {
-	p.cfg.SetClientOpts(opts)
+func (p *clientConfigPersister) Persist(config *gondor.Config) error {
+	p.cfg.SetClientConfig(config)
 	if err := p.cfg.Save(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cfg *GlobalConfig) GetClientOpts() *gondor.ClientOpts {
-	opts := gondor.ClientOpts{}
-	opts.ID = cfg.ClientOpts.ID
-	opts.BaseURL = cfg.ClientOpts.BaseURL
-	opts.IdentityURL = cfg.ClientOpts.IdentityURL
-	opts.Auth.Username = cfg.ClientOpts.Auth.Username
-	opts.Auth.AccessToken = cfg.ClientOpts.Auth.AccessToken
-	opts.Auth.RefreshToken = cfg.ClientOpts.Auth.RefreshToken
-	opts.Persister = &clientOptsPersister{cfg: cfg}
-	return &opts
+func (cfg *GlobalConfig) GetClientConfig() *gondor.Config {
+	config := gondor.Config{}
+	config.ID = cfg.client.ID
+	config.BaseURL = cfg.client.BaseURL
+	config.IdentityURL = cfg.client.IdentityURL
+	config.Auth.Username = cfg.client.Auth.Username
+	config.Auth.AccessToken = cfg.client.Auth.AccessToken
+	config.Auth.RefreshToken = cfg.client.Auth.RefreshToken
+	config.Persister = &clientConfigPersister{cfg: cfg}
+	return &config
 }
 
-func (cfg *GlobalConfig) SetClientOpts(opts *gondor.ClientOpts) {
-	cfg.ClientOpts.ID = opts.ID
-	cfg.ClientOpts.BaseURL = opts.BaseURL
-	cfg.ClientOpts.IdentityURL = opts.IdentityURL
-	cfg.ClientOpts.Auth.Username = opts.Auth.Username
-	cfg.ClientOpts.Auth.AccessToken = opts.Auth.AccessToken
-	cfg.ClientOpts.Auth.RefreshToken = opts.Auth.RefreshToken
+func (cfg *GlobalConfig) SetClientConfig(config *gondor.Config) {
+	cfg.client.ID = config.ID
+	cfg.client.BaseURL = config.BaseURL
+	cfg.client.IdentityURL = config.IdentityURL
+	cfg.client.Auth.Username = config.Auth.Username
+	cfg.client.Auth.AccessToken = config.Auth.AccessToken
+	cfg.client.Auth.RefreshToken = config.Auth.RefreshToken
 }
 
 func (cfg *GlobalConfig) Save() error {
