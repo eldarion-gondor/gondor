@@ -11,7 +11,11 @@ import (
 	"net/url"
 )
 
-func (c *Client) SendRequest(method string, url *url.URL, payload, result interface{}) (*http.Response, error) {
+func (c *Client) SendRequest(method string, url *url.URL, payload, result interface{}, attempts int) (*http.Response, error) {
+	attempts++
+	if attempts > 2 {
+		return nil, errors.New("exceeded maximum retry limit")
+	}
 	var err error
 	header := http.Header{}
 	header.Add("Authorization", fmt.Sprintf("Bearer %s", c.opts.Auth.AccessToken))
@@ -48,27 +52,28 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 			}
 		}
 		if resp.StatusCode >= 400 {
-			if err := json.Unmarshal(respBody, errList); err != nil {
-				if verr, ok := err.(*json.UnmarshalTypeError); ok {
-					if verr.Value == "array" {
-						var errLofL []ErrorList
-						err = json.Unmarshal(respBody, errLofL)
-						if err == nil {
-							if len(errLofL) > 0 {
-								errList = errLofL[0]
+			switch resp.StatusCode {
+			case 400:
+				if err := json.Unmarshal(respBody, errList); err != nil {
+					if verr, ok := err.(*json.UnmarshalTypeError); ok {
+						if verr.Value == "array" {
+							var errLofL []ErrorList
+							err = json.Unmarshal(respBody, errLofL)
+							if err == nil {
+								if len(errLofL) > 0 {
+									errList = errLofL[0]
+								}
 							}
 						}
 					}
+					if err != nil {
+						return resp, err
+					}
 				}
-				if err != nil {
-					return resp, err
-				}
-			}
-			switch resp.StatusCode {
-			case 400:
 				return resp, apiError{errList: errList}
 			case 401:
-				return resp, errors.New("unauthorized")
+				c.AuthenticateWithRefreshToken()
+				return c.SendRequest(method, url, payload, result, attempts)
 			case 500:
 				return resp, fmt.Errorf("server error\nOur staff has been notified of this error. Please try again later.")
 			case 502:
@@ -82,21 +87,21 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 }
 
 func (c *Client) Get(url *url.URL, result interface{}) (*http.Response, error) {
-	return c.SendRequest("GET", url, nil, result)
+	return c.SendRequest("GET", url, nil, result, 0)
 }
 
 func (c *Client) Post(url *url.URL, payload, result interface{}) (*http.Response, error) {
-	return c.SendRequest("POST", url, payload, result)
+	return c.SendRequest("POST", url, payload, result, 0)
 }
 
 func (c *Client) Put(url *url.URL, payload, result interface{}) (*http.Response, error) {
-	return c.SendRequest("PUT", url, payload, result)
+	return c.SendRequest("PUT", url, payload, result, 0)
 }
 
 func (c *Client) Patch(url *url.URL, payload, result interface{}) (*http.Response, error) {
-	return c.SendRequest("PATCH", url, payload, result)
+	return c.SendRequest("PATCH", url, payload, result, 0)
 }
 
 func (c *Client) Delete(url *url.URL, result interface{}) (*http.Response, error) {
-	return c.SendRequest("DELETE", url, nil, result)
+	return c.SendRequest("DELETE", url, nil, result, 0)
 }

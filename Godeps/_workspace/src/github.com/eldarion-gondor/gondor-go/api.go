@@ -6,14 +6,24 @@ import (
 	"net/url"
 )
 
+type ClientOptsPersister interface {
+	Persist(*ClientOpts) error
+}
+
 type ClientOpts struct {
-	ID      string
-	BaseURL string
-	Auth    struct {
+	ID          string
+	BaseURL     string
+	IdentityURL string
+	Auth        struct {
 		Username     string
 		AccessToken  string
 		RefreshToken string
 	}
+	Persister ClientOptsPersister
+}
+
+func (opts *ClientOpts) Persist() error {
+	return opts.Persister.Persist(opts)
 }
 
 type Client struct {
