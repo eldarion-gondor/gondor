@@ -13,9 +13,10 @@ import (
 
 type GlobalConfig struct {
 	ClientOpts struct {
-		ID      string `yaml:"id,omitempty"`
-		BaseURL string `yaml:"base_url,omitempty"`
-		Auth    struct {
+		ID          string `yaml:"id,omitempty"`
+		BaseURL     string `yaml:"base_url,omitempty"`
+		IdentityURL string `yaml:"identity_url,omitempty"`
+		Auth        struct {
 			Username     string `yaml:"username,omitempty"`
 			AccessToken  string `yaml:"access_token,omitempty"`
 			RefreshToken string `yaml:"refresh_token,omitempty"`
@@ -60,6 +61,7 @@ func (cfg *GlobalConfig) GetClientOpts() *gondor.ClientOpts {
 	opts := gondor.ClientOpts{}
 	opts.ID = cfg.ClientOpts.ID
 	opts.BaseURL = cfg.ClientOpts.BaseURL
+	opts.IdentityURL = cfg.ClientOpts.IdentityURL
 	opts.Auth.Username = cfg.ClientOpts.Auth.Username
 	opts.Auth.AccessToken = cfg.ClientOpts.Auth.AccessToken
 	opts.Auth.RefreshToken = cfg.ClientOpts.Auth.RefreshToken
@@ -70,6 +72,7 @@ func (cfg *GlobalConfig) GetClientOpts() *gondor.ClientOpts {
 func (cfg *GlobalConfig) SetClientOpts(opts *gondor.ClientOpts) {
 	cfg.ClientOpts.ID = opts.ID
 	cfg.ClientOpts.BaseURL = opts.BaseURL
+	cfg.ClientOpts.IdentityURL = opts.IdentityURL
 	cfg.ClientOpts.Auth.Username = opts.Auth.Username
 	cfg.ClientOpts.Auth.AccessToken = opts.Auth.AccessToken
 	cfg.ClientOpts.Auth.RefreshToken = opts.Auth.RefreshToken
