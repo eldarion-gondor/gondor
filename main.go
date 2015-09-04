@@ -575,8 +575,9 @@ func getAPIClient(ctx *cli.Context) *gondor.Client {
 	if api == nil {
 		if !gcfg.loaded || gcfg.ClientOpts.ID == "" {
 			gcfg.SetClientOpts(&gondor.ClientOpts{
-				ID:      "KtcICiPMAII8FAeArUoDB97zmjqltllyUDev8HOS",
-				BaseURL: ctx.GlobalString("api-url"),
+				ID:          "KtcICiPMAII8FAeArUoDB97zmjqltllyUDev8HOS",
+				BaseURL:     ctx.GlobalString("api-url"),
+				IdentityURL: "https://identity.gondor.io",
 			})
 		}
 		api = gondor.NewClient(gcfg.GetClientOpts())
