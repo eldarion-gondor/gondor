@@ -23,7 +23,10 @@ release: guard-VERSION cross-build
 	gsutil cp -a public-read ./bin/gondor-darwin-amd64 gs://gondor-cli/gondor-v$(VERSION)-darwin-amd64
 	gsutil cp -a public-read ./bin/gondor-windows-amd64.exe gs://gondor-cli/gondor-v$(VERSION)-windows-amd64.exe
 
+homebrew: guard-VERSION
+	GOPATH=$(shell pwd)/Godeps/_workspace go build -a -ldflags "-X main.version=$(VERSION)" -o bin/gondor
+
 clean:
 	rm -rf bin/
 
-.PHONY: build cross-build release
+.PHONY: build cross-build release homebrew
