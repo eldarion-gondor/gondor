@@ -560,6 +560,21 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:  "dev",
+			Usage: "manage local development environments",
+			Action: func(ctx *cli.Context) {
+				checkVersion()
+				cli.ShowSubcommandHelp(ctx)
+			},
+			Subcommands: []cli.Command{
+				{
+					Name:   "up",
+					Usage:  "[site] boot up a development environment for site",
+					Action: stdCmd(devUpCmd),
+				},
+			},
+		},
 	}
 	configPath, err := homedir.Expand("~/.config/gondor/config")
 	if err != nil {
