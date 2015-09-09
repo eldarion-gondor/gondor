@@ -1,12 +1,6 @@
 GOPATH=$(shell pwd)/Godeps/_workspace
 VERSION=$(shell cat VERSION | tr -d '\n ')
 
-guard-%:
-	@ if [ "${${*}}" == "" ]; then \
-		echo "Environment variable $* not set"; \
-		exit 1; \
-	fi
-
 build:
 	go build -a -ldflags "-X main.version=$(VERSION)" -o bin/gondor ./src
 
@@ -19,9 +13,9 @@ bin/gondor-darwin-amd64:
 bin/gondor-windows-amd64.exe:
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=$(VERSION)" -o bin/gondor-windows-amd64.exe ./src
 
-cross-build: guard-VERSION bin/gondor-linux-amd64 bin/gondor-darwin-amd64 bin/gondor-windows-amd64.exe
+cross-build: bin/gondor-linux-amd64 bin/gondor-darwin-amd64 bin/gondor-windows-amd64.exe
 
-release: guard-VERSION cross-build
+release: cross-build
 	gsutil cp -a public-read ./bin/gondor-linux-amd64 gs://gondor-cli/gondor-v$(VERSION)-linux-amd64
 	gsutil cp -a public-read ./bin/gondor-darwin-amd64 gs://gondor-cli/gondor-v$(VERSION)-darwin-amd64
 	gsutil cp -a public-read ./bin/gondor-windows-amd64.exe gs://gondor-cli/gondor-v$(VERSION)-windows-amd64.exe
