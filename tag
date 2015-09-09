@@ -8,7 +8,7 @@ git tag "v$1"
 git push --tags
 
 # update homebrew/gondor.rb
-sed -i "s/[0-9a-f]\{64\}/$(curl -sL "https://github.com/eldarion-gondor/cli/archive/v$1.tar.gz" | shasum -a 256)/" homebrew/gondor.rb
+sed -i "s/[0-9a-f]\{64\}/$(git archive --format=tar v$1 | gzip -c | shasum -a 256)/" homebrew/gondor.rb
 sed -i "s/v[0-9]\{1,2\}\.[0-9]\{1,2\}\.[0-9]\{1,2\}/v$1/" homebrew/gondor.rb
 git commit -am "updated homebrew for v$1"
 
