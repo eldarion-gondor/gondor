@@ -8,8 +8,8 @@ class Gondor < Formula
   depends_on "go" => :build
 
   def install
-    ENV["VERSION"] = "0.2.3"
-    system "make", "homebrew"
+    ENV["CGO_ENABLED"] = "0"
+    system "make", "build"
     bin.install "bin/gondor"
   end
 
