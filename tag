@@ -1,6 +1,11 @@
 #!/bin/bash
 
-set -ex
+set -e
+
+if [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]]; then
+    echo "You have uncommmited changes; please add/commit first."
+    exit 1
+fi
 
 echo "$1" > VERSION
 git commit -am "bumped version to v$1"
