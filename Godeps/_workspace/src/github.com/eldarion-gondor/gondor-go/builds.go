@@ -72,8 +72,12 @@ func (build *Build) Perform(blob io.Reader) (string, error) {
 	var payload struct {
 		Endpoint string `json:"endpoint,omitempty"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return "", err
+	if resp.StatusCode < 300 {
+		if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+			return "", err
+		}
+	} else {
+		return "", fmt.Errorf("build: non-200 response; got %s", resp.Status)
 	}
 	return payload.Endpoint, nil
 }
