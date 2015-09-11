@@ -1,5 +1,5 @@
 GOPATH=$(shell pwd)/Godeps/_workspace
-VERSION=$(shell cat VERSION | tr -d '\n ')
+VERSION ?= $(shell cat VERSION | tr -d '\n ')
 
 build:
 	GOPATH=$(GOPATH) go build -a -ldflags "-X main.version=$(VERSION)" -o bin/gondor ./src
