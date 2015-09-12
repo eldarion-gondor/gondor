@@ -2,8 +2,8 @@ class Gondor < Formula
   desc "Gondor CLI"
   homepage "https://next.gondor.io"
   head "https://github.com/eldarion-gondor/cli.git"
-  url "https://github.com/eldarion-gondor/cli/archive/v0.3.3.tar.gz"
-  sha256 "3091bdb8e3479274eec113dc5cedf60a063b5dfa9c189116e21fba3b903feb3f"
+  url "https://github.com/eldarion-gondor/cli/archive/v0.3.4.tar.gz"
+  sha256 "737e2012e45bc96828cdf44cc5b6fc603ceaaf5919a4d15e773d000cbe21a231"
 
   depends_on "go" => :build
 
