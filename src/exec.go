@@ -79,7 +79,7 @@ func remoteExec(endpoint string, enableTty bool) (int, error) {
 				opts.Height = h
 			}
 		}
-		pipe, err := piper.NewClientPipe(endpoint, opts)
+		pipe, err := piper.NewClientPipe(endpoint, opts, nil)
 		if err != nil {
 			fmt.Println(err.Error())
 			return 1

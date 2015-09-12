@@ -17,7 +17,7 @@
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/piper",
-			"Rev": "4b7d1f3da8ef6d804c3568f69ea531beb1dc65a3"
+			"Rev": "18bc98ab1a2f15e0c37636981d04c13671632859"
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
