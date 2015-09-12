@@ -15,7 +15,11 @@ func success(s string) {
 	fmt.Fprintf(os.Stderr, "%s %s\n", successize("Success:"), s)
 }
 
-func fatal(s string) {
+func failure(s string) {
 	fmt.Fprintf(os.Stderr, "%s %s\n", errize("Error:"), s)
+}
+
+func fatal(s string) {
+	failure(s)
 	os.Exit(1)
 }

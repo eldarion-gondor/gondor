@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/eldarion-gondor/cli",
-	"GoVersion": "go1.5",
+	"GoVersion": "go1.5.1",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/bgentry/speakeasy",
@@ -18,6 +21,11 @@
 		{
 			"ImportPath": "github.com/eldarion-gondor/piper",
 			"Rev": "01fea3be55d970f34548c278b28e197298971a73"
+		},
+		{
+			"ImportPath": "github.com/flynn/flynn/pkg/attempt",
+			"Comment": "v20150912.0",
+			"Rev": "ec66a63e3e4fb4179f28dbf29c0a06ab8514ac19"
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",

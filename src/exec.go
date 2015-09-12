@@ -1,14 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/eldarion-gondor/gondor-go"
 	"github.com/eldarion-gondor/piper"
+	"github.com/flynn/flynn/pkg/attempt"
 	"github.com/tj/go-spin"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -40,26 +41,25 @@ func remoteExec(endpoint string, enableTty bool) (int, error) {
 		}()
 	}
 	// wait for ok to report 200
-	if err := gondor.WaitFor(60*2, func() (bool, error) {
+	if err := (attempt.Strategy{
+		Total: 2 * time.Minute,
+		Delay: 1 * time.Second,
+	}.Run(func() error {
 		okURL := "https://" + endpoint + "/ok"
 		resp, err := http.Get(okURL)
 		if err != nil {
-			return false, err
+			return err
 		}
 		if resp.StatusCode == 200 {
-			return true, nil
+			return nil
 		}
-		return false, nil
-	}); err != nil {
+		return errors.New("non-200 response")
+	})); err != nil {
 		done <- struct{}{}
 		if showIndicator {
 			fmt.Fprintf(outs, "\r\033[36mAttaching...\033[m failed\n")
 		}
 		return 1, err
-	}
-	done <- struct{}{}
-	if showIndicator {
-		fmt.Fprintf(outs, "\r\033[36mAttaching...\033[m ok\n")
 	}
 	return func() int {
 		opts := piper.Opts{}
@@ -79,14 +79,31 @@ func remoteExec(endpoint string, enableTty bool) (int, error) {
 				opts.Height = h
 			}
 		}
-		pipe, err := piper.NewClientPipe(endpoint, opts, nil)
-		if err != nil {
-			fmt.Println(err.Error())
+		var pipe *piper.Pipe
+		if err := (attempt.Strategy{
+			Total: 10 * time.Second,
+			Delay: 1 * time.Second,
+		}.Run(func() error {
+			var err error
+			pipe, err = piper.NewClientPipe(endpoint, opts, nil)
+			if err != nil {
+				return err
+			}
+			return nil
+		})); err != nil {
+			if showIndicator {
+				fmt.Fprintf(outs, "\r\033[36mAttaching...\033[m error\n")
+			}
+			failure(err.Error())
 			return 1
+		}
+		done <- struct{}{}
+		if showIndicator {
+			fmt.Fprintf(outs, "\r\033[36mAttaching...\033[m ok\n")
 		}
 		exitCode, err := pipe.Interact()
 		if err != nil {
-			fmt.Println(err.Error())
+			failure(err.Error())
 			return 1
 		}
 		return exitCode
