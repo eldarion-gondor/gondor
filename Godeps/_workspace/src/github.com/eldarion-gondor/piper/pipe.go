@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -42,8 +41,8 @@ type Winsize struct {
 }
 
 type syncPayload struct {
+	ch  chan struct{}
 	buf []byte
-	wg  sync.WaitGroup
 }
 
 func NewPipe(conn *websocket.Conn, opts Opts, logger *log.Logger) *Pipe {
@@ -79,10 +78,10 @@ func (pipe *Pipe) writer() {
 				return
 			}
 			if err := write(websocket.BinaryMessage, sp.buf); err != nil {
-				sp.wg.Done()
+				sp.ch <- struct{}{}
 				return
 			}
-			sp.wg.Done()
+			sp.ch <- struct{}{}
 		case <-ticker.C:
 			pipe.logger.Println("pipe: writing ping message")
 			if err := write(websocket.PingMessage, []byte{}); err != nil {
@@ -93,10 +92,12 @@ func (pipe *Pipe) writer() {
 }
 
 func (pipe *Pipe) Send(payload []byte) {
-	sp := &syncPayload{buf: payload}
-	sp.wg.Add(1)
+	sp := &syncPayload{
+		ch:  make(chan struct{}),
+		buf: payload,
+	}
 	pipe.send <- sp
-	sp.wg.Wait()
+	<-sp.ch
 }
 
 func (pipe *Pipe) sendExit(code uint32) {
