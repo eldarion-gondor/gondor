@@ -10,10 +10,10 @@ class Gondor < Formula
   def install
     ENV["CGO_ENABLED"] = "0"
     system "make", "build"
-    bin.install "bin/gondor"
+    bin.install "bin/g3a"
   end
 
   test do
-    system "#{bin}/gondor", "--version"
+    system "#{bin}/g3a", "--version"
   end
 end
