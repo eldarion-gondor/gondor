@@ -595,7 +595,7 @@ func checkVersion() {
 		outs = os.Stderr
 		shouldCheck = true
 	}
-	if strings.Contains(app.Version, "-dev") {
+	if strings.Contains(app.Version, "dev") {
 		shouldCheck = false
 	}
 	if shouldCheck {
