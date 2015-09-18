@@ -11,6 +11,7 @@ import (
 	"net/url"
 )
 
+// SendRequest will build an HTTP request to send to the Gondor API.
 func (c *Client) SendRequest(method string, url *url.URL, payload, result interface{}, attempts int) (*http.Response, error) {
 	attempts++
 	if attempts > 2 {
@@ -54,7 +55,7 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 		if resp.StatusCode >= 400 {
 			switch resp.StatusCode {
 			case 400:
-				if err := json.Unmarshal(respBody, errList); err != nil {
+				if err := json.Unmarshal(respBody, &errList); err != nil {
 					if verr, ok := err.(*json.UnmarshalTypeError); ok {
 						if verr.Value == "array" {
 							var errLofL []ErrorList
@@ -75,9 +76,15 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 				c.AuthenticateWithRefreshToken()
 				return c.SendRequest(method, url, payload, result, attempts)
 			case 500:
-				return resp, fmt.Errorf("server error\nOur staff has been notified of this error. Please try again later.")
+				return resp, fmt.Errorf(
+					"Internal Server Error\n%s",
+					"Our staff has been notified of this error. Please try again later.",
+				)
 			case 502:
-				return resp, fmt.Errorf("bad gateway\nOur staff has been notified of this error. Please try again later.")
+				return resp, fmt.Errorf(
+					"Bad Gateway\n%s",
+					"Our staff has been notified of this error. Please try again later.",
+				)
 			default:
 				return resp, fmt.Errorf("unknown response: %d", resp.StatusCode)
 			}
@@ -86,22 +93,27 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 	return resp, nil
 }
 
+// Get issues an HTTP GET request
 func (c *Client) Get(url *url.URL, result interface{}) (*http.Response, error) {
 	return c.SendRequest("GET", url, nil, result, 0)
 }
 
+// Post issues an HTTP POST request
 func (c *Client) Post(url *url.URL, payload, result interface{}) (*http.Response, error) {
 	return c.SendRequest("POST", url, payload, result, 0)
 }
 
+// Put issues an HTTP PUT request
 func (c *Client) Put(url *url.URL, payload, result interface{}) (*http.Response, error) {
 	return c.SendRequest("PUT", url, payload, result, 0)
 }
 
+// Patch issues an HTTP PATCH request
 func (c *Client) Patch(url *url.URL, payload, result interface{}) (*http.Response, error) {
 	return c.SendRequest("PATCH", url, payload, result, 0)
 }
 
+// Delete issues an HTTP DELETE request
 func (c *Client) Delete(url *url.URL, result interface{}) (*http.Response, error) {
 	return c.SendRequest("DELETE", url, nil, result, 0)
 }
