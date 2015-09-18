@@ -45,7 +45,7 @@ func stdCmd(cmdFunc func(*cli.Context)) func(*cli.Context) {
 
 func main() {
 	app = cli.NewApp()
-	app.Name = "gondor"
+	app.Name = "g3a"
 	app.Version = version
 	app.Author = "Eldarion, Inc."
 	app.Email = "development@eldarion.com"
