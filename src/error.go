@@ -16,7 +16,7 @@ func success(s string) {
 }
 
 func failure(s string) {
-	fmt.Fprintf(os.Stderr, "%s %s\n", errize("Error:"), s)
+	fmt.Fprintf(os.Stderr, "%s %s\n", errize("ERROR:"), s)
 }
 
 func fatal(s string) {
