@@ -59,7 +59,7 @@ func main() {
 			Name:   "api-url",
 			Value:  "https://api.us2.gondor.io",
 			Usage:  "API URL endpoint",
-			EnvVar: "GONDOR_API_URL",
+			EnvVar: "G3A_API_URL",
 		},
 		cli.StringFlag{
 			Name:   "ca-cert",
@@ -70,8 +70,8 @@ func main() {
 		cli.StringFlag{
 			Name:   "resource-group",
 			Value:  "",
-			Usage:  "Scope requests to given resource group (default is resource group of site otherwise personal)",
-			EnvVar: "GONDOR_RESOURCE_GROUP",
+			Usage:  "scope requests to given resource group (default is resource group of site otherwise personal)",
+			EnvVar: "G3A_RESOURCE_GROUP",
 		},
 	}
 	app.Action = func(ctx *cli.Context) {
