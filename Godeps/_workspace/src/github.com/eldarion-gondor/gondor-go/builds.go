@@ -64,7 +64,7 @@ func (build *Build) Perform(blob io.Reader) (string, error) {
 		return "", err
 	}
 	req.ContentLength = fi.Size()
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := build.r.client.httpClient.Do(req)
 	if err != nil {
 		return "", err
 	}

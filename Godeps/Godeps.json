@@ -16,11 +16,11 @@
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/gondor-go",
-			"Rev": "0dbd26b5436263a46f68f76be0d0b5c46b04d370"
+			"Rev": "8cbed1eba8fcb50d950aac58efdad9db6514c25e"
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/piper",
-			"Rev": "01fea3be55d970f34548c278b28e197298971a73"
+			"Rev": "18d30ae04448dde1f950359433a2886736a7c915"
 		},
 		{
 			"ImportPath": "github.com/flynn/flynn/pkg/attempt",

@@ -45,10 +45,10 @@ type Client struct {
 	Metrics        *MetricResource
 }
 
-func NewClient(cfg *Config) *Client {
+func NewClient(cfg *Config, httpClient *http.Client) *Client {
 	c := &Client{
 		cfg:        cfg,
-		httpClient: http.DefaultClient,
+		httpClient: httpClient,
 	}
 	c.attachResources()
 	return c

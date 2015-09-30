@@ -30,7 +30,13 @@ func pgRunCmd(ctx *cli.Context) {
 	if err != nil {
 		fatal(err.Error())
 	}
-	exitCode, err := remoteExec(endpoint, true)
+	re := remoteExec{
+		endpoint:   endpoint,
+		enableTty:  true,
+		httpClient: getHttpClient(ctx),
+		tlsConfig:  getTLSConfig(ctx),
+	}
+	exitCode, err := re.execute()
 	if err != nil {
 		fatal(err.Error())
 	}

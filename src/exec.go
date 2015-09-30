@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -14,7 +15,14 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func remoteExec(endpoint string, enableTty bool) (int, error) {
+type remoteExec struct {
+	endpoint   string
+	enableTty  bool
+	httpClient *http.Client
+	tlsConfig  *tls.Config
+}
+
+func (re *remoteExec) execute() (int, error) {
 	done := make(chan struct{}, 1)
 	var showIndicator bool
 	var outs io.Writer
@@ -40,13 +48,17 @@ func remoteExec(endpoint string, enableTty bool) (int, error) {
 			}
 		}()
 	}
+	httpClient := re.httpClient
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
 	// wait for ok to report 200
 	if err := (attempt.Strategy{
 		Total: 2 * time.Minute,
 		Delay: 1 * time.Second,
 	}.Run(func() error {
-		okURL := "https://" + endpoint + "/ok"
-		resp, err := http.Get(okURL)
+		okURL := "https://" + re.endpoint + "/ok"
+		resp, err := httpClient.Get(okURL)
 		if err != nil {
 			return err
 		}
@@ -63,7 +75,7 @@ func remoteExec(endpoint string, enableTty bool) (int, error) {
 	}
 	return func() int {
 		opts := piper.Opts{}
-		if enableTty {
+		if re.enableTty {
 			if terminal.IsTerminal(int(os.Stdin.Fd())) {
 				w, h, err := terminal.GetSize(int(os.Stdin.Fd()))
 				if err != nil {
@@ -85,7 +97,7 @@ func remoteExec(endpoint string, enableTty bool) (int, error) {
 			Delay: 1 * time.Second,
 		}.Run(func() error {
 			var err error
-			pipe, err = piper.NewClientPipe(endpoint, opts, nil)
+			pipe, err = piper.NewClientPipe(re.endpoint, opts, re.tlsConfig, nil)
 			if err != nil {
 				return err
 			}

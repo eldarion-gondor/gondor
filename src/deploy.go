@@ -58,7 +58,13 @@ func deployCmd(ctx *cli.Context) {
 	if err := cmd.Wait(); err != nil {
 		cleanup(err)
 	}
-	exitCode, err := remoteExec(endpoint, false)
+	re := remoteExec{
+		endpoint:   endpoint,
+		enableTty:  false,
+		httpClient: getHttpClient(ctx),
+		tlsConfig:  getTLSConfig(ctx),
+	}
+	exitCode, err := re.execute()
 	if err != nil {
 		fatal(err.Error())
 	}

@@ -75,6 +75,14 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 			case 401:
 				c.AuthenticateWithRefreshToken()
 				return c.SendRequest(method, url, payload, result, attempts)
+			case 404:
+				var errDetail struct {
+					Detail string `json:"detail"`
+				}
+				if err := json.Unmarshal(respBody, &errDetail); err != nil {
+					return resp, err
+				}
+				return resp, fmt.Errorf("HTTP 404: %s", errDetail.Detail)
 			case 500:
 				return resp, fmt.Errorf(
 					"Internal Server Error\n%s",

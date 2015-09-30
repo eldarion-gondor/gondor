@@ -1,9 +1,12 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"runtime"
@@ -57,6 +60,12 @@ func main() {
 			Value:  "https://api.us2.gondor.io",
 			Usage:  "API URL endpoint",
 			EnvVar: "GONDOR_API_URL",
+		},
+		cli.StringFlag{
+			Name:   "ca-cert",
+			Value:  "",
+			Usage:  "certificate authority certificate file path",
+			EnvVar: "G3A_CA_CERT",
 		},
 		cli.StringFlag{
 			Name:   "resource-group",
@@ -580,9 +589,34 @@ func getAPIClient(ctx *cli.Context) *gondor.Client {
 				IdentityURL: "https://identity.gondor.io",
 			})
 		}
-		api = gondor.NewClient(gcfg.GetClientConfig())
+		httpClient := getHttpClient(ctx)
+		api = gondor.NewClient(gcfg.GetClientConfig(), httpClient)
 	}
 	return api
+}
+
+func getTLSConfig(ctx *cli.Context) *tls.Config {
+	var pool *x509.CertPool
+	if ctx.GlobalString("ca-cert") != "" {
+		pem, err := ioutil.ReadFile(ctx.GlobalString("ca-cert"))
+		if err != nil {
+			// warn user
+		} else {
+			pool = x509.NewCertPool()
+			if ok := pool.AppendCertsFromPEM(pem); !ok {
+				pool = nil
+				// warn user
+			}
+		}
+	}
+	return &tls.Config{RootCAs: pool}
+}
+
+func getHttpClient(ctx *cli.Context) *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: getTLSConfig(ctx),
+	}
+	return &http.Client{Transport: tr}
 }
 
 func checkVersion() {
