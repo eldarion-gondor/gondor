@@ -11,7 +11,7 @@ import (
 func deployCmd(ctx *cli.Context) {
 	MustLoadSiteConfig()
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor deploy <git-ref>")
+		fmt.Println("Usage: gondor deploy [--instance] <git-ref>")
 		fatal(msg)
 	}
 	if len(ctx.Args()) < 2 {
