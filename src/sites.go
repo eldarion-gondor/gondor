@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/codegangsta/cli"
 	"github.com/eldarion-gondor/gondor-go"
@@ -35,6 +38,40 @@ func sitesListCmd(ctx *cli.Context) {
 		})
 	}
 	table.Render()
+}
+
+func sitesInitCmd(ctx *cli.Context) {
+	if _, err := os.Stat(configFilename); !os.IsNotExist(err) {
+		fatal("site already initialized")
+	}
+	api := getAPIClient(ctx)
+	resourceGroup := getResourceGroup(ctx, api)
+	site := gondor.Site{
+		ResourceGroup: resourceGroup,
+		Name:          ctx.String("name"),
+	}
+	if err := api.Sites.Create(&site); err != nil {
+		fatal(err.Error())
+	}
+	instance := gondor.Instance{
+		Site:  &site,
+		Label: "primary",
+		Kind:  "production",
+	}
+	if err := api.Instances.Create(&instance); err != nil {
+		fatal(err.Error())
+	}
+	sc := SiteConfig{
+		Identifier: fmt.Sprintf("%s/%s", site.ResourceGroup.Name, site.Name),
+	}
+	buf, err := yaml.Marshal(sc)
+	if err != nil {
+		panic(err.Error())
+	}
+	if err := ioutil.WriteFile(configFilename, buf, 0644); err != nil {
+		fatal(fmt.Sprintf("writing %s: %s", configFilename, err))
+	}
+	fmt.Printf("Wrote %s to your current directory.\nYour site is ready to be deployed. To deploy, run:\n\n\tg3a deploy primary master\n\nDon't forget to commit %s before deploying.\n", configFilename, configFilename)
 }
 
 func sitesCreateCmd(ctx *cli.Context) {

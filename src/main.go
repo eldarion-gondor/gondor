@@ -123,6 +123,18 @@ func main() {
 					Action: stdCmd(sitesListCmd),
 				},
 				{
+					Name:  "init",
+					Usage: "create a site, production instance and write config",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "name",
+							Value: "",
+							Usage: "optional name for site",
+						},
+					},
+					Action: stdCmd(sitesInitCmd),
+				},
+				{
 					Name:   "create",
 					Usage:  "create a site in the resource group",
 					Action: stdCmd(sitesCreateCmd),

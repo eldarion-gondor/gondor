@@ -11,6 +11,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const configFilename = "gondor.yml"
+
 type GlobalConfig struct {
 	Version string `yaml:"version,omitempty"`
 	Client  struct {
