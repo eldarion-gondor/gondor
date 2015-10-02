@@ -140,6 +140,11 @@ func main() {
 					Usage: "attach keypair to service",
 					Flags: []cli.Flag{
 						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+						cli.StringFlag{
 							Name:  "keypair",
 							Value: "",
 							Usage: "name of keypair",
@@ -157,9 +162,14 @@ func main() {
 					Usage: "detach keypair from service",
 					Flags: []cli.Flag{
 						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+						cli.StringFlag{
 							Name:  "service",
 							Value: "",
-							Usage: "service path",
+							Usage: "service name",
 						},
 					},
 					Action: stdCmd(keypairsDetachCmd),

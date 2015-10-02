@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/codegangsta/cli"
 	"github.com/eldarion-gondor/gondor-go"
@@ -81,7 +80,7 @@ func keypairsCreateCmd(ctx *cli.Context) {
 
 func keypairsAttachCmd(ctx *cli.Context) {
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor keypairs attach --keypair=<keypair-name> --service=<service-identifer>")
+		fmt.Println("Usage: gondor keypairs attach [--instance] --keypair=<keypair-name> --service=<name>")
 		fatal(msg)
 	}
 
@@ -94,27 +93,14 @@ func keypairsAttachCmd(ctx *cli.Context) {
 
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
-	site := getSite(ctx, api)
 
 	keypair, err := api.KeyPairs.GetByName(ctx.String("keypair"), resourceGroup)
 	if err != nil {
 		fatal(err.Error())
 	}
 
-	var instanceLabel, serviceName string
-
-	if strings.Contains(ctx.String("service"), "/") {
-		parts := strings.Split(ctx.String("service"), "/")
-		instanceLabel = parts[0]
-		serviceName = parts[1]
-	} else {
-		fatal("invalid --service value")
-	}
-	instance, err := api.Instances.Get(site, instanceLabel)
-	if err != nil {
-		fatal(err.Error())
-	}
-	service, err := api.Services.Get(instance, serviceName)
+	instance := getInstance(ctx, api, nil)
+	service, err := api.Services.Get(instance, ctx.String("service"))
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -132,7 +118,7 @@ func keypairsAttachCmd(ctx *cli.Context) {
 
 func keypairsDetachCmd(ctx *cli.Context) {
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor keypairs detach --service=<service-identifer>")
+		fmt.Println("Usage: gondor keypairs detach [--instance] --service=<name>")
 		fatal(msg)
 	}
 
@@ -141,22 +127,8 @@ func keypairsDetachCmd(ctx *cli.Context) {
 	}
 
 	api := getAPIClient(ctx)
-	site := getSite(ctx, api)
-
-	var instanceLabel, serviceName string
-
-	if strings.Contains(ctx.String("service"), "/") {
-		parts := strings.Split(ctx.String("service"), "/")
-		instanceLabel = parts[0]
-		serviceName = parts[1]
-	} else {
-		usage(fmt.Sprintf("%q is not a service identifier", ctx.String("service")))
-	}
-	instance, err := api.Instances.Get(site, instanceLabel)
-	if err != nil {
-		fatal(err.Error())
-	}
-	service, err := api.Services.Get(instance, serviceName)
+	instance := getInstance(ctx, api, nil)
+	service, err := api.Services.Get(instance, ctx.String("service"))
 	if err != nil {
 		fatal(err.Error())
 	}
