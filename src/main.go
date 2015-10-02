@@ -459,20 +459,16 @@ func main() {
 			},
 		},
 		{
-			Name:            "run",
-			Usage:           "[site] run a one-off process",
-			SkipFlagParsing: true,
-			Action:          stdCmd(runCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-				}
+			Name:  "run",
+			Usage: "[site] run a one-off process",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "instance",
+					Value: "",
+					Usage: "instance label",
+				},
 			},
+			Action: stdCmd(runCmd),
 		},
 		{
 			Name:  "deploy",
@@ -541,20 +537,16 @@ func main() {
 			},
 			Subcommands: []cli.Command{
 				{
-					Name:            "run",
-					Usage:           "Run a one-off process against the database",
-					SkipFlagParsing: true,
-					Action:          stdCmd(pgRunCmd),
-					BashComplete: func(ctx *cli.Context) {
-						if len(ctx.Args()) > 0 {
-							return
-						}
-						api := getAPIClient(ctx)
-						site := getSite(ctx, api)
-						for i := range site.Instances {
-							fmt.Println(site.Instances[i].Label)
-						}
+					Name:  "run",
+					Usage: "Run a one-off process against the database",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
 					},
+					Action: stdCmd(pgRunCmd),
 				},
 			},
 		},
