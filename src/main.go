@@ -110,57 +110,6 @@ func main() {
 			},
 		},
 		{
-			Name:  "sites",
-			Usage: "manage sites",
-			Action: func(ctx *cli.Context) {
-				checkVersion()
-				cli.ShowSubcommandHelp(ctx)
-			},
-			Subcommands: []cli.Command{
-				{
-					Name:   "list",
-					Usage:  "show sites in the resource group",
-					Action: stdCmd(sitesListCmd),
-				},
-				{
-					Name:  "init",
-					Usage: "create a site, production instance and write config",
-					Flags: []cli.Flag{
-						cli.StringFlag{
-							Name:  "name",
-							Value: "",
-							Usage: "optional name for site",
-						},
-					},
-					Action: stdCmd(sitesInitCmd),
-				},
-				{
-					Name:   "create",
-					Usage:  "create a site in the resource group",
-					Action: stdCmd(sitesCreateCmd),
-				},
-				{
-					Name:   "delete",
-					Usage:  "delete a site in the resource group",
-					Action: stdCmd(sitesDeleteCmd),
-					BashComplete: func(ctx *cli.Context) {
-						if len(ctx.Args()) > 0 {
-							return
-						}
-						api := getAPIClient(ctx)
-						resourceGroup := getResourceGroup(ctx, api)
-						sites, err := api.Sites.List(resourceGroup)
-						if err != nil {
-							return
-						}
-						for i := range sites {
-							fmt.Println(sites[i].Name)
-						}
-					},
-				},
-			},
-		},
-		{
 			Name:  "keypairs",
 			Usage: "manage keypairs",
 			Action: func(ctx *cli.Context) {
@@ -238,107 +187,274 @@ func main() {
 			},
 		},
 		{
-			Name:  "create",
-			Usage: "[site] create a new instance or service",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "instance-kind",
-					Value: "dev",
-				},
-				cli.StringFlag{
-					Name:  "service-name",
-					Value: "",
-					Usage: "name of the service",
-				},
-				cli.StringFlag{
-					Name:  "service-version",
-					Value: "",
-					Usage: "version for the new service",
-				},
+			Name:  "sites",
+			Usage: "manage sites",
+			Action: func(ctx *cli.Context) {
+				checkVersion()
+				cli.ShowSubcommandHelp(ctx)
 			},
-			Action: stdCmd(createCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-				}
+			Subcommands: []cli.Command{
+				{
+					Name:   "list",
+					Usage:  "show sites in the resource group",
+					Action: stdCmd(sitesListCmd),
+				},
+				{
+					Name:  "init",
+					Usage: "create a site, production instance and write config",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "name",
+							Value: "",
+							Usage: "optional name for site",
+						},
+					},
+					Action: stdCmd(sitesInitCmd),
+				},
+				{
+					Name:   "create",
+					Usage:  "create a site in the resource group",
+					Action: stdCmd(sitesCreateCmd),
+				},
+				{
+					Name:   "delete",
+					Usage:  "delete a site in the resource group",
+					Action: stdCmd(sitesDeleteCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						resourceGroup := getResourceGroup(ctx, api)
+						sites, err := api.Sites.List(resourceGroup)
+						if err != nil {
+							return
+						}
+						for i := range sites {
+							fmt.Println(sites[i].Name)
+						}
+					},
+				},
+				{
+					Name:   "env",
+					Usage:  "",
+					Action: stdCmd(sitesEnvCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						resourceGroup := getResourceGroup(ctx, api)
+						sites, err := api.Sites.List(resourceGroup)
+						if err != nil {
+							return
+						}
+						for i := range sites {
+							fmt.Println(sites[i].Name)
+						}
+					},
+				},
+				{
+					Name:  "users",
+					Usage: "manage users",
+					Action: func(ctx *cli.Context) {
+						checkVersion()
+						cli.ShowSubcommandHelp(ctx)
+					},
+					Subcommands: []cli.Command{
+						{
+							Name:   "list",
+							Usage:  "List users for the site",
+							Action: stdCmd(sitesUsersListCmd),
+						},
+						{
+							Name:   "add",
+							Usage:  "Add a user to site with a given role",
+							Action: stdCmd(sitesUsersAddCmd),
+							Flags: []cli.Flag{
+								cli.StringFlag{
+									Name:  "role",
+									Value: "dev",
+									Usage: "desired role for user",
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 		{
-			Name:   "delete",
-			Usage:  "[site] delete instance/service for the given site/instance",
-			Action: stdCmd(deleteCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-					for j := range site.Instances[i].Services {
-						fmt.Printf("%s/%s\n", site.Instances[i].Label, site.Instances[i].Services[j].Name)
-					}
-				}
+			Name:  "instances",
+			Usage: "[site] manage instances",
+			Action: func(ctx *cli.Context) {
+				checkVersion()
+				cli.ShowSubcommandHelp(ctx)
 			},
-		},
-		{
-			Name:   "list",
-			Usage:  "[site] display instances/services for the given site/instance",
-			Action: stdCmd(listCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-				}
-			},
-		},
-		{
-			Name:  "scale",
-			Usage: "[site] scale up/down a service on an instance",
-			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:  "replicas",
-					Usage: "desired number of replicas",
+			Subcommands: []cli.Command{
+				{
+					Name:  "create",
+					Usage: "create new instance",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "kind",
+							Value: "",
+							Usage: "kind of instance",
+						},
+					},
+					Action: stdCmd(instancesCreateCmd),
+				},
+				{
+					Name:   "list",
+					Usage:  "",
+					Action: stdCmd(instancesListCmd),
+				},
+				{
+					Name:   "delete",
+					Usage:  "",
+					Action: stdCmd(instancesDeleteCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						site := getSite(ctx, api)
+						for i := range site.Instances {
+							fmt.Println(site.Instances[i].Label)
+						}
+					},
+				},
+				{
+					Name:   "env",
+					Usage:  "",
+					Action: stdCmd(instancesEnvCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						site := getSite(ctx, api)
+						for i := range site.Instances {
+							fmt.Println(site.Instances[i].Label)
+						}
+					},
 				},
 			},
-			Action: stdCmd(scaleCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					for j := range site.Instances[i].Services {
-						fmt.Printf("%s/%s\n", site.Instances[i].Label, site.Instances[i].Services[j].Name)
-					}
-				}
-			},
 		},
 		{
-			Name:   "restart",
-			Usage:  "[site] restart a service on a given instance",
-			Action: stdCmd(restartCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					for j := range site.Instances[i].Services {
-						fmt.Printf("%s/%s\n", site.Instances[i].Label, site.Instances[i].Services[j].Name)
-					}
-				}
+			Name:  "services",
+			Usage: "[site] manage services",
+			Action: func(ctx *cli.Context) {
+				checkVersion()
+				cli.ShowSubcommandHelp(ctx)
+			},
+			Subcommands: []cli.Command{
+				{
+					Name:  "create",
+					Usage: "create new service",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "name",
+							Value: "",
+							Usage: "name of the service",
+						},
+						cli.StringFlag{
+							Name:  "version",
+							Value: "",
+							Usage: "version for the new service",
+						},
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
+					Action: stdCmd(servicesCreateCmd),
+				},
+				{
+					Name:  "list",
+					Usage: "",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
+					Action: stdCmd(servicesListCmd),
+				},
+				{
+					Name:  "delete",
+					Usage: "",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
+					Action: stdCmd(servicesDeleteCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						instance := getInstance(ctx, api, nil)
+						for i := range instance.Services {
+							fmt.Println(instance.Services[i].Name)
+						}
+					},
+				},
+				{
+					Name:   "env",
+					Usage:  "",
+					Action: stdCmd(servicesEnvCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						instance := getInstance(ctx, api, nil)
+						for i := range instance.Services {
+							fmt.Println(instance.Services[i].Name)
+						}
+					},
+				},
+				{
+					Name:  "scale",
+					Usage: "[site] scale up/down a service on an instance",
+					Flags: []cli.Flag{
+						cli.IntFlag{
+							Name:  "replicas",
+							Usage: "desired number of replicas",
+						},
+					},
+					Action: stdCmd(servicesScaleCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						instance := getInstance(ctx, api, nil)
+						for i := range instance.Services {
+							fmt.Println(instance.Services[i].Name)
+						}
+					},
+				},
+				{
+					Name:   "restart",
+					Usage:  "[site] restart a service on a given instance",
+					Action: stdCmd(servicesRestartCmd),
+					BashComplete: func(ctx *cli.Context) {
+						if len(ctx.Args()) > 0 {
+							return
+						}
+						api := getAPIClient(ctx)
+						instance := getInstance(ctx, api, nil)
+						for i := range instance.Services {
+							fmt.Println(instance.Services[i].Name)
+						}
+					},
+				},
 			},
 		},
 		{
@@ -358,19 +474,16 @@ func main() {
 			},
 		},
 		{
-			Name:   "deploy",
-			Usage:  "[site] create a new release and deploy",
-			Action: stdCmd(deployCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-				}
+			Name:  "deploy",
+			Usage: "[site] create a new release and deploy",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "instance",
+					Value: "",
+					Usage: "instance label",
+				},
 			},
+			Action: stdCmd(deployCmd),
 		},
 		{
 			Name:  "hosts",
@@ -381,50 +494,40 @@ func main() {
 			},
 			Subcommands: []cli.Command{
 				{
-					Name:   "list",
-					Usage:  "List hosts for an instance",
+					Name:  "list",
+					Usage: "List hosts for an instance",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
 					Action: stdCmd(hostsListCmd),
-					BashComplete: func(ctx *cli.Context) {
-						if len(ctx.Args()) > 0 {
-							return
-						}
-						api := getAPIClient(ctx)
-						site := getSite(ctx, api)
-						for i := range site.Instances {
-							fmt.Println(site.Instances[i].Label)
-						}
-					},
 				},
 				{
-					Name:   "create",
-					Usage:  "Create a host for an instance",
+					Name:  "create",
+					Usage: "Create a host for an instance",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
 					Action: stdCmd(hostsCreateCmd),
-					BashComplete: func(ctx *cli.Context) {
-						if len(ctx.Args()) > 0 {
-							return
-						}
-						api := getAPIClient(ctx)
-						site := getSite(ctx, api)
-						for i := range site.Instances {
-							fmt.Println(site.Instances[i].Label)
-						}
-					},
 				},
 				{
-					Name:   "delete",
-					Usage:  "Delete a host from an instance",
-					Action: stdCmd(hostsDeleteCmd),
-					BashComplete: func(ctx *cli.Context) {
-						if len(ctx.Args()) > 0 {
-							return
-						}
-						api := getAPIClient(ctx)
-						site := getSite(ctx, api)
-						for i := range site.Instances {
-							fmt.Println(site.Instances[i].Label)
-							// todo
-						}
+					Name:  "delete",
+					Usage: "Delete a host from an instance",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
 					},
+					Action: stdCmd(hostsDeleteCmd),
 				},
 			},
 		},
@@ -458,39 +561,23 @@ func main() {
 			Name:   "open",
 			Usage:  "[site] open instance URL in browser",
 			Action: stdCmd(openCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-				}
-			},
-		},
-		{
-			Name:   "env",
-			Usage:  "[site] manage environment variables",
-			Action: stdCmd(envCmd),
-			BashComplete: func(ctx *cli.Context) {
-				if len(ctx.Args()) > 0 {
-					return
-				}
-				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-					for j := range site.Instances[i].Services {
-						fmt.Printf("%s/%s\n", site.Instances[i].Label, site.Instances[i].Services[j].Name)
-					}
-				}
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "instance",
+					Value: "",
+					Usage: "instance label",
+				},
 			},
 		},
 		{
 			Name:  "logs",
 			Usage: "[site] view logs for an instance or service",
 			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "instance",
+					Value: "",
+					Usage: "instance label",
+				},
 				cli.IntFlag{
 					Name:  "lines",
 					Value: 20,
@@ -503,12 +590,9 @@ func main() {
 					return
 				}
 				api := getAPIClient(ctx)
-				site := getSite(ctx, api)
-				for i := range site.Instances {
-					fmt.Println(site.Instances[i].Label)
-					for j := range site.Instances[i].Services {
-						fmt.Printf("%s/%s\n", site.Instances[i].Label, site.Instances[i].Services[j].Name)
-					}
+				instance := getInstance(ctx, api, nil)
+				for i := range instance.Services {
+					fmt.Println(instance.Services[i].Name)
 				}
 			},
 		},
@@ -553,33 +637,6 @@ func main() {
 					fmt.Println("")
 				}
 			}),
-		},
-		{
-			Name:  "users",
-			Usage: "[site] manage users for a site",
-			Action: func(ctx *cli.Context) {
-				checkVersion()
-				cli.ShowSubcommandHelp(ctx)
-			},
-			Subcommands: []cli.Command{
-				{
-					Name:   "list",
-					Usage:  "List users for the site",
-					Action: stdCmd(usersListCmd),
-				},
-				{
-					Name:   "add",
-					Usage:  "Add a user to site with a given role",
-					Action: stdCmd(usersAddCmd),
-					Flags: []cli.Flag{
-						cli.StringFlag{
-							Name:  "role",
-							Value: "dev",
-							Usage: "desired role for user",
-						},
-					},
-				},
-			},
 		},
 	}
 	configPath, err := homedir.Expand("~/.config/gondor/config")
@@ -722,4 +779,19 @@ func getSite(ctx *cli.Context, api *gondor.Client) *gondor.Site {
 		fatal(err.Error())
 	}
 	return site
+}
+
+func getInstance(ctx *cli.Context, api *gondor.Client, site *gondor.Site) *gondor.Instance {
+	if site == nil {
+		site = getSite(ctx, api)
+	}
+	label := ctx.String("instance")
+	if label == "" {
+		label = "primary"
+	}
+	instance, err := api.Instances.Get(site, label)
+	if err != nil {
+		fatal(err.Error())
+	}
+	return instance
 }

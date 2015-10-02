@@ -12,20 +12,15 @@ import (
 func hostsListCmd(ctx *cli.Context) {
 	MustLoadSiteConfig()
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor hosts list <instance-label>")
+		fmt.Println("Usage: gondor hosts list")
 		fatal(msg)
 	}
 	if len(ctx.Args()) == 0 {
 		usage("too few arguments")
 	}
-	instanceLabel := ctx.Args()[0]
 
 	api := getAPIClient(ctx)
-	site := getSite(ctx, api)
-	instance, err := api.Instances.Get(site, instanceLabel)
-	if err != nil {
-		fatal(err.Error())
-	}
+	instance := getInstance(ctx, api, nil)
 
 	hostNames, err := api.HostNames.List(instance)
 	if err != nil {
@@ -45,22 +40,17 @@ func hostsListCmd(ctx *cli.Context) {
 func hostsCreateCmd(ctx *cli.Context) {
 	MustLoadSiteConfig()
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor hosts create <instance-label> <hostname>")
+		fmt.Println("Usage: gondor hosts create <hostname>")
 		fatal(msg)
 	}
 	if len(ctx.Args()) < 2 {
 		usage("too few arguments")
 	}
 
-	instanceLabel := ctx.Args()[0]
-	newHostName := ctx.Args()[1]
+	newHostName := ctx.Args()[0]
 
 	api := getAPIClient(ctx)
-	site := getSite(ctx, api)
-	instance, err := api.Instances.Get(site, instanceLabel)
-	if err != nil {
-		fatal(err.Error())
-	}
+	instance := getInstance(ctx, api, nil)
 
 	hostName := gondor.HostName{
 		Instance: instance,
@@ -74,24 +64,17 @@ func hostsCreateCmd(ctx *cli.Context) {
 func hostsDeleteCmd(ctx *cli.Context) {
 	MustLoadSiteConfig()
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor hosts delete <instance-label> <hostname>")
+		fmt.Println("Usage: gondor hosts delete <hostname>")
 		fatal(msg)
 	}
 	if len(ctx.Args()) < 2 {
 		usage("too few arguments")
 	}
 
-	instanceLabel := ctx.Args()[0]
-	newHostName := ctx.Args()[1]
+	newHostName := ctx.Args()[0]
 
 	api := getAPIClient(ctx)
-	site := getSite(ctx, api)
-
-	// lookup instance
-	instance, err := api.Instances.Get(site, instanceLabel)
-	if err != nil {
-		fatal(err.Error())
-	}
+	instance := getInstance(ctx, api, nil)
 
 	hostName := gondor.HostName{
 		Instance: instance,

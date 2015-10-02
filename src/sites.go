@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 
@@ -109,4 +110,78 @@ func sitesDeleteCmd(ctx *cli.Context) {
 	if err := api.Sites.Delete(site); err != nil {
 		fatal(err.Error())
 	}
+}
+
+func sitesEnvCmd(ctx *cli.Context) {
+	api := getAPIClient(ctx)
+	site := getSite(ctx, api)
+	var err error
+	var createMode bool
+	var displayEnvVars, desiredEnvVars []*gondor.EnvironmentVariable
+	if len(ctx.Args()) >= 2 {
+		createMode = true
+		for i := range ctx.Args() {
+			arg := ctx.Args()[i]
+			if strings.Contains(arg, "=") {
+				parts := strings.Split(arg, "=")
+				envVar := gondor.EnvironmentVariable{
+					Site:  site,
+					Key:   parts[0],
+					Value: parts[1],
+				}
+				desiredEnvVars = append(desiredEnvVars, &envVar)
+			}
+		}
+	}
+	if !createMode {
+		displayEnvVars, err = api.EnvVars.ListBySite(site)
+		if err != nil {
+			fatal(err.Error())
+		}
+		for i := range displayEnvVars {
+			envVar := displayEnvVars[i]
+			fmt.Printf("%s=%s\n", envVar.Key, envVar.Value)
+		}
+	} else {
+		if err := api.EnvVars.Create(desiredEnvVars); err != nil {
+			fatal(err.Error())
+		}
+		for i := range desiredEnvVars {
+			fmt.Printf("%s=%s\n", desiredEnvVars[i].Key, desiredEnvVars[i].Value)
+		}
+	}
+}
+
+func sitesUsersListCmd(ctx *cli.Context) {
+	MustLoadSiteConfig()
+	api := getAPIClient(ctx)
+	site := getSite(ctx, api)
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Username", "Role"})
+	for i := range site.Users {
+		user := site.Users[i]
+		table.Append([]string{
+			user.User.Username,
+			user.Role,
+		})
+	}
+	table.Render()
+}
+
+func sitesUsersAddCmd(ctx *cli.Context) {
+	usage := func(msg string) {
+		fmt.Println("Usage: gondor sites users add [--role=dev] <email>")
+		fatal(msg)
+	}
+	if len(ctx.Args()) == 0 {
+		usage("too few arguments")
+	}
+	MustLoadSiteConfig()
+	api := getAPIClient(ctx)
+	site := getSite(ctx, api)
+	email := ctx.Args()[0]
+	if err := site.AddUser(email, ctx.String("role")); err != nil {
+		fatal(err.Error())
+	}
+	success(fmt.Sprintf("added %q to %s", email, site.Name))
 }
