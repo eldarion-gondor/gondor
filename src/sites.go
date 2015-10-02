@@ -64,6 +64,7 @@ func sitesInitCmd(ctx *cli.Context) {
 	}
 	sc := SiteConfig{
 		Identifier: fmt.Sprintf("%s/%s", site.ResourceGroup.Name, site.Name),
+		Branches:   map[string]string{"master": "primary"},
 	}
 	buf, err := yaml.Marshal(sc)
 	if err != nil {

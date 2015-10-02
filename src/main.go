@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 
@@ -785,9 +786,22 @@ func getInstance(ctx *cli.Context, api *gondor.Client, site *gondor.Site) *gondo
 	if site == nil {
 		site = getSite(ctx, api)
 	}
+	var branch string
+	output, err := exec.Command("git", "symbolic-ref", "HEAD").Output()
+	if err != nil {
+		fatal(fmt.Sprintf("running git: %s", err))
+	}
+	bits := strings.Split(strings.TrimSpace(string(output)), "/")
+	if len(bits) == 3 {
+		branch = bits[2]
+	}
 	label := ctx.String("instance")
 	if label == "" {
-		label = "primary"
+		if _, ok := siteCfg.Branches[branch]; ok && branch != "" {
+			label = siteCfg.Branches[branch]
+		} else {
+			label = "primary"
+		}
 	}
 	instance, err := api.Instances.Get(site, label)
 	if err != nil {

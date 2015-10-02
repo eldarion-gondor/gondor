@@ -115,7 +115,8 @@ func (cfg *GlobalConfig) Save() error {
 }
 
 type SiteConfig struct {
-	Identifier string `yaml:"site"`
+	Identifier string            `yaml:"site"`
+	Branches   map[string]string `yaml:"branches,omitempty"`
 
 	loaded   bool
 	filename string
