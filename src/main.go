@@ -814,12 +814,11 @@ func getInstance(ctx *cli.Context, api *gondor.Client, site *gondor.Site) *gondo
 	}
 	var branch string
 	output, err := exec.Command("git", "symbolic-ref", "HEAD").Output()
-	if err != nil {
-		fatal(fmt.Sprintf("running git: %s", err))
-	}
-	bits := strings.Split(strings.TrimSpace(string(output)), "/")
-	if len(bits) == 3 {
-		branch = bits[2]
+	if err == nil {
+		bits := strings.Split(strings.TrimSpace(string(output)), "/")
+		if len(bits) == 3 {
+			branch = bits[2]
+		}
 	}
 	label := ctx.String("instance")
 	if label == "" {
