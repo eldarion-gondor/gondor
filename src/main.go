@@ -302,7 +302,7 @@ func main() {
 		},
 		{
 			Name:  "instances",
-			Usage: "[site] manage instances",
+			Usage: "manage instances",
 			Action: func(ctx *cli.Context) {
 				checkVersion()
 				cli.ShowSubcommandHelp(ctx)
@@ -359,7 +359,7 @@ func main() {
 		},
 		{
 			Name:  "services",
-			Usage: "[site] manage services",
+			Usage: "manage services",
 			Action: func(ctx *cli.Context) {
 				checkVersion()
 				cli.ShowSubcommandHelp(ctx)
@@ -438,7 +438,7 @@ func main() {
 				},
 				{
 					Name:  "scale",
-					Usage: "[site] scale up/down a service on an instance",
+					Usage: "scale up/down a service on an instance",
 					Flags: []cli.Flag{
 						cli.IntFlag{
 							Name:  "replicas",
@@ -459,7 +459,7 @@ func main() {
 				},
 				{
 					Name:   "restart",
-					Usage:  "[site] restart a service on a given instance",
+					Usage:  "restart a service on a given instance",
 					Action: stdCmd(servicesRestartCmd),
 					BashComplete: func(ctx *cli.Context) {
 						if len(ctx.Args()) > 0 {
@@ -476,7 +476,7 @@ func main() {
 		},
 		{
 			Name:  "run",
-			Usage: "[site] run a one-off process",
+			Usage: "run a one-off process",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "instance",
@@ -488,7 +488,7 @@ func main() {
 		},
 		{
 			Name:  "deploy",
-			Usage: "[site] create a new release and deploy",
+			Usage: "create a new release and deploy",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "instance",
@@ -500,7 +500,7 @@ func main() {
 		},
 		{
 			Name:  "hosts",
-			Usage: "[site] manage hosts for an instance",
+			Usage: "manage hosts for an instance",
 			Action: func(ctx *cli.Context) {
 				checkVersion()
 				cli.ShowSubcommandHelp(ctx)
@@ -546,7 +546,7 @@ func main() {
 		},
 		{
 			Name:  "pg",
-			Usage: "[site] manage database",
+			Usage: "manage database",
 			Action: func(ctx *cli.Context) {
 				checkVersion()
 				cli.ShowSubcommandHelp(ctx)
@@ -568,7 +568,7 @@ func main() {
 		},
 		{
 			Name:   "open",
-			Usage:  "[site] open instance URL in browser",
+			Usage:  "open instance URL in browser",
 			Action: stdCmd(openCmd),
 			Flags: []cli.Flag{
 				cli.StringFlag{
@@ -580,7 +580,7 @@ func main() {
 		},
 		{
 			Name:  "logs",
-			Usage: "[site] view logs for an instance or service",
+			Usage: "view logs for an instance or service",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "instance",
@@ -607,7 +607,7 @@ func main() {
 		},
 		{
 			Name:  "metrics",
-			Usage: "[site] view metrics for a given service",
+			Usage: "view metrics for a given service",
 			Action: stdCmd(func(ctx *cli.Context) {
 				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
