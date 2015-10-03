@@ -71,7 +71,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "resource-group",
 			Value:  "",
-			Usage:  "scope requests to given resource group (default is resource group of site otherwise personal)",
+			Usage:  "resource group used for this invocation",
 			EnvVar: "G3A_RESOURCE_GROUP",
 		},
 		cli.StringFlag{
