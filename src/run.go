@@ -12,7 +12,6 @@ func runCmd(ctx *cli.Context) {
 		fmt.Println("Usage: gondor run [--instance] -- <executable> <arg-or-option>...")
 		fatal(msg)
 	}
-	MustLoadSiteConfig()
 	if len(ctx.Args()) == 0 {
 		usage("too few arguments")
 	}

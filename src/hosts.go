@@ -10,7 +10,6 @@ import (
 )
 
 func hostsListCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor hosts list")
 		fatal(msg)
@@ -38,7 +37,6 @@ func hostsListCmd(ctx *cli.Context) {
 }
 
 func hostsCreateCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor hosts create <hostname>")
 		fatal(msg)
@@ -62,7 +60,6 @@ func hostsCreateCmd(ctx *cli.Context) {
 }
 
 func hostsDeleteCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor hosts delete <hostname>")
 		fatal(msg)

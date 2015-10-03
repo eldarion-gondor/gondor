@@ -11,7 +11,6 @@ import (
 )
 
 func instancesCreateCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor instances create [--kind] <label>")
 		fatal(msg)
@@ -33,7 +32,6 @@ func instancesCreateCmd(ctx *cli.Context) {
 }
 
 func instancesListCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	table := tablewriter.NewWriter(os.Stdout)
@@ -50,7 +48,6 @@ func instancesListCmd(ctx *cli.Context) {
 }
 
 func instancesDeleteCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor instances delete <label>")
 		fatal(msg)

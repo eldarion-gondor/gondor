@@ -13,8 +13,6 @@ var blue func(string) string = ansi.ColorFunc("blue+b")
 var red func(string) string = ansi.ColorFunc("red+b")
 
 func logsCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
-
 	var err error
 	var instance *gondor.Instance
 	var service *gondor.Service

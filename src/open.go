@@ -8,7 +8,6 @@ import (
 )
 
 func openCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	open.Run(fmt.Sprintf("https://%s/", instance.WebURL))

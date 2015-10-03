@@ -154,7 +154,6 @@ func sitesEnvCmd(ctx *cli.Context) {
 }
 
 func sitesUsersListCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	table := tablewriter.NewWriter(os.Stdout)
@@ -177,7 +176,6 @@ func sitesUsersAddCmd(ctx *cli.Context) {
 	if len(ctx.Args()) == 0 {
 		usage("too few arguments")
 	}
-	MustLoadSiteConfig()
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	email := ctx.Args()[0]

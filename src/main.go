@@ -74,6 +74,12 @@ func main() {
 			Usage:  "scope requests to given resource group (default is resource group of site otherwise personal)",
 			EnvVar: "G3A_RESOURCE_GROUP",
 		},
+		cli.StringFlag{
+			Name:   "site",
+			Value:  "",
+			Usage:  "site used for this invocation",
+			EnvVar: "G3A_SITE",
+		},
 	}
 	app.Action = func(ctx *cli.Context) {
 		checkVersion()
@@ -603,7 +609,6 @@ func main() {
 			Name:  "metrics",
 			Usage: "[site] view metrics for a given service",
 			Action: stdCmd(func(ctx *cli.Context) {
-				MustLoadSiteConfig()
 				api := getAPIClient(ctx)
 				site := getSite(ctx, api)
 				if len(ctx.Args()) != 1 {
@@ -745,7 +750,7 @@ func checkForUpgrade(currentVersion string) (*versionInfo, error) {
 
 func parseSiteIdentifier(value string) (string, string) {
 	if value == "" {
-		fatal("site not defined in gondor.yml")
+		fatal("site not defined (either --site or in gondor.yml)")
 	}
 	if strings.Count(value, "/") != 1 {
 		fatal(fmt.Sprintf("invalid site value: %q", value))
@@ -775,8 +780,27 @@ func getResourceGroup(ctx *cli.Context, api *gondor.Client) *gondor.ResourceGrou
 }
 
 func getSite(ctx *cli.Context, api *gondor.Client) *gondor.Site {
-	resourceGroup := getResourceGroup(ctx, api)
-	_, siteName := parseSiteIdentifier(siteCfg.Identifier)
+	var err error
+	var siteName string
+	var resourceGroup *gondor.ResourceGroup
+	siteFlag := ctx.GlobalString("site")
+	if siteFlag != "" {
+		if strings.Count(siteFlag, "/") == 1 {
+			parts := strings.Split(siteFlag, "/")
+			resourceGroup, err = api.ResourceGroups.GetByName(parts[0])
+			if err != nil {
+				fatal(err.Error())
+			}
+			siteName = parts[1]
+		} else {
+			resourceGroup = getResourceGroup(ctx, api)
+			siteName = siteFlag
+		}
+	} else {
+		LoadSiteConfig()
+		resourceGroup = getResourceGroup(ctx, api)
+		_, siteName = parseSiteIdentifier(siteCfg.Identifier)
+	}
 	site, err := api.Sites.Get(siteName, resourceGroup)
 	if err != nil {
 		fatal(err.Error())

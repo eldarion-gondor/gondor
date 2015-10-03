@@ -9,7 +9,6 @@ import (
 )
 
 func listCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	var instanceLabel string
 	if len(ctx.Args()) == 1 {
 		instanceLabel = ctx.Args()[0]

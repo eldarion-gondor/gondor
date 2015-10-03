@@ -12,7 +12,6 @@ import (
 )
 
 func servicesCreateCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor services create [--name,--version,--instance] <service-kind>")
 		fatal(msg)
@@ -37,7 +36,6 @@ func servicesCreateCmd(ctx *cli.Context) {
 }
 
 func servicesListCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	table := tablewriter.NewWriter(os.Stdout)
@@ -55,7 +53,6 @@ func servicesListCmd(ctx *cli.Context) {
 }
 
 func servicesDeleteCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor services delete <name>")
 		fatal(msg)
@@ -125,7 +122,6 @@ func servicesEnvCmd(ctx *cli.Context) {
 }
 
 func servicesScaleCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor services scale --replicas=N <name>")
 		fatal(msg)
@@ -148,7 +144,6 @@ func servicesScaleCmd(ctx *cli.Context) {
 }
 
 func servicesRestartCmd(ctx *cli.Context) {
-	MustLoadSiteConfig()
 	usage := func(msg string) {
 		fmt.Println("Usage: gondor services restart <name>")
 		fatal(msg)
