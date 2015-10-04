@@ -21,12 +21,9 @@ type ResourceGroup struct {
 
 func (r *ResourceGroupResource) findOne(url *url.URL) (*ResourceGroup, error) {
 	var res *ResourceGroup
-	resp, err := r.client.Get(url, &res)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
-	}
-	if resp.StatusCode == 404 {
-		return nil, fmt.Errorf("resource group not found")
 	}
 	res.r = r
 	return res, nil
@@ -37,7 +34,11 @@ func (r *ResourceGroupResource) GetByName(name string) (*ResourceGroup, error) {
 	q := url.Query()
 	q.Set("name", name)
 	url.RawQuery = q.Encode()
-	return r.findOne(url)
+	resourceGroup, err := r.findOne(url)
+	if _, ok := err.(ErrNotFound); ok {
+		return resourceGroup, fmt.Errorf("resource group %q was not found", name)
+	}
+	return resourceGroup, err
 }
 
 func (r *ResourceGroupResource) List() ([]*ResourceGroup, error) {
