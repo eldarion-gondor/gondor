@@ -15,15 +15,7 @@ import (
 
 func sitesListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
-
-	var resourceGroup *gondor.ResourceGroup
-	var err error
-	if ctx.GlobalString("resource-group") != "" {
-		resourceGroup, err = api.ResourceGroups.GetByName(ctx.GlobalString("resource-group"))
-		if err != nil {
-			fatal(err.Error())
-		}
-	}
+	resourceGroup := getResourceGroup(ctx, api)
 
 	sites, err := api.Sites.List(resourceGroup)
 	if err != nil {
