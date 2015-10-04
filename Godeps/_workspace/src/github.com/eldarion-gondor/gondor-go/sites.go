@@ -56,12 +56,9 @@ func (r *SiteResource) List(resourceGroup *ResourceGroup) ([]*Site, error) {
 
 func (r *SiteResource) findOne(url *url.URL) (*Site, error) {
 	var res *Site
-	resp, err := r.client.Get(url, &res)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
-	}
-	if resp.StatusCode == 404 {
-		return nil, fmt.Errorf("site not found")
 	}
 	res.r = r
 	return res, nil
@@ -75,7 +72,15 @@ func (r *SiteResource) Get(name string, resourceGroup *ResourceGroup) (*Site, er
 		q.Set("resource_group", resourceGroup.URL)
 	}
 	url.RawQuery = q.Encode()
-	return r.findOne(url)
+	site, err := r.findOne(url)
+	if _, ok := err.(ErrNotFound); ok {
+		identifier := name
+		if resourceGroup != nil {
+			identifier = fmt.Sprintf("%s/%s", resourceGroup.Name, name)
+		}
+		return site, fmt.Errorf("site %q was not found", identifier)
+	}
+	return site, err
 }
 
 func (r *SiteResource) Delete(site *Site) error {

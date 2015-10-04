@@ -26,12 +26,9 @@ type Instance struct {
 
 func (r *InstanceResource) findOne(url *url.URL) (*Instance, error) {
 	var res *Instance
-	resp, err := r.client.Get(url, &res)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
-	}
-	if resp.StatusCode == 404 {
-		return nil, fmt.Errorf("instance not found")
 	}
 	res.r = r
 	return res, nil
@@ -60,7 +57,11 @@ func (r *InstanceResource) Get(site *Site, label string) (*Instance, error) {
 	q.Set("site", site.URL)
 	q.Set("label", label)
 	url.RawQuery = q.Encode()
-	return r.findOne(url)
+	instance, err := r.findOne(url)
+	if _, ok := err.(ErrNotFound); ok {
+		return instance, fmt.Errorf("instance %q was not found", label)
+	}
+	return instance, err
 }
 
 func (r *InstanceResource) Delete(instance *Instance) error {

@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+type ErrNotFound struct {
+	msg string
+}
+
+func (e ErrNotFound) Error() string {
+	return e.msg
+}
+
 type APIError interface {
 	Errors() []string
 }

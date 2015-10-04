@@ -84,7 +84,7 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 				if err := json.Unmarshal(respBody, &errDetail); err != nil {
 					return resp, err
 				}
-				return resp, fmt.Errorf("HTTP 404: %s", errDetail.Detail)
+				return resp, ErrNotFound{msg: errDetail.Detail}
 			case 500:
 				return resp, fmt.Errorf(
 					"Internal Server Error\n%s",
