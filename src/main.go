@@ -781,6 +781,15 @@ func getResourceGroup(ctx *cli.Context, api *gondor.Client) *gondor.ResourceGrou
 			if err != nil {
 				fatal(err.Error())
 			}
+		} else {
+			user, err := api.AuthenticatedUser()
+			if err != nil {
+				fatal(err.Error())
+			}
+			if user.ResourceGroup == nil {
+				fatal("you do not have a personal resource group.")
+			}
+			resourceGroup = user.ResourceGroup
 		}
 	}
 	return resourceGroup
