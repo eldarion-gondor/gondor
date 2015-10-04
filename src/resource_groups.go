@@ -14,7 +14,7 @@ func resourceGroupListCmd(ctx *cli.Context) {
 		fatal(err.Error())
 	}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Identifer"})
+	table.SetHeader([]string{"Name"})
 	for i := range resourceGroups {
 		resourceGroup := resourceGroups[i]
 		table.Append([]string{

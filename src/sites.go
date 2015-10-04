@@ -23,11 +23,11 @@ func sitesListCmd(ctx *cli.Context) {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Identifier"})
+	table.SetHeader([]string{"Name"})
 	for i := range sites {
 		site := sites[i]
 		table.Append([]string{
-			fmt.Sprintf("%s/%s", site.ResourceGroup.Name, site.Name),
+			site.Name,
 		})
 	}
 	table.Render()
