@@ -43,6 +43,8 @@ type Client struct {
 	EnvVars        *EnvironmentVariableResource
 	Logs           *LogResource
 	Metrics        *MetricResource
+
+	logHTTP bool
 }
 
 func NewClient(cfg *Config, httpClient *http.Client) *Client {
@@ -52,6 +54,10 @@ func NewClient(cfg *Config, httpClient *http.Client) *Client {
 	}
 	c.attachResources()
 	return c
+}
+
+func (c *Client) EnableHTTPLogging(value bool) {
+	c.logHTTP = value
 }
 
 func (c *Client) attachResources() {

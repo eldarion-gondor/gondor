@@ -80,6 +80,10 @@ func main() {
 			Usage:  "site used for this invocation",
 			EnvVar: "G3A_SITE",
 		},
+		cli.BoolFlag{
+			Name:  "log-http",
+			Usage: "log HTTP interactions",
+		},
 	}
 	app.Action = func(ctx *cli.Context) {
 		checkVersion()
@@ -668,6 +672,9 @@ func getAPIClient(ctx *cli.Context) *gondor.Client {
 		}
 		httpClient := getHttpClient(ctx)
 		api = gondor.NewClient(gcfg.GetClientConfig(), httpClient)
+		if ctx.GlobalBool("log-http") {
+			api.EnableHTTPLogging(true)
+		}
 	}
 	return api
 }

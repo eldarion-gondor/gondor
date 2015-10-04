@@ -36,11 +36,13 @@ func (c *Client) SendRequest(method string, url *url.URL, payload, result interf
 	}
 	header.Add("Accept", "application/json")
 	req.Header = header
+	c.logRequest(req)
 	var errList ErrorList
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	c.logResponse(resp)
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
