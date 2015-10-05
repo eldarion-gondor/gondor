@@ -10,16 +10,21 @@ import (
 
 func deployCmd(ctx *cli.Context) {
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor deploy [--instance] <git-ref>")
+		fmt.Println("Usage: gondor deploy [--instance] [<git-ref>]")
 		fatal(msg)
 	}
-	if len(ctx.Args()) < 2 {
-		usage("too few arguments")
-	}
-	source := ctx.Args()[0]
 	// 0. prepare API
+	var source string
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
+	source, ok := siteCfg.instances[instance.Label]
+	if !ok {
+		if len(ctx.Args()) < 2 {
+			usage("too few arguments")
+		}
+		source = ctx.Args()[0]
+	}
+	fmt.Printf("-----> Preparing deployment of %s to %s...", source, instance.Label)
 	// 1. create a release for the instance
 	release, err := api.Releases.Create(instance)
 	if err != nil {

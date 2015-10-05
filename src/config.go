@@ -118,6 +118,8 @@ type SiteConfig struct {
 	Identifier string            `yaml:"site"`
 	Branches   map[string]string `yaml:"branches,omitempty"`
 
+	instances map[string]string
+
 	loaded   bool
 	filename string
 }
@@ -155,6 +157,11 @@ func LoadSiteConfig() error {
 	siteCfg.filename = filename
 	if err := LoadSiteConfigFromFile(filename, &siteCfg); err != nil {
 		return err
+	}
+	// reverse the branches mapping
+	siteCfg.instances = make(map[string]string)
+	for branch := range siteCfg.Branches {
+		siteCfg.instances[siteCfg.Branches[branch]] = branch
 	}
 	siteCfg.loaded = true
 	return nil
