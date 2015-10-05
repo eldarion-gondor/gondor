@@ -838,10 +838,14 @@ func getInstance(ctx *cli.Context, api *gondor.Client, site *gondor.Site) *gondo
 	}
 	label := ctx.String("instance")
 	if label == "" {
-		if _, ok := siteCfg.Branches[branch]; ok && branch != "" {
-			label = siteCfg.Branches[branch]
+		if branch != "" {
+			var ok bool
+			label, ok = siteCfg.Branches[branch]
+			if !ok {
+				fatal(fmt.Sprintf("unable to map %q to an instance. Please provide --instance or map it to an instance in gondor.yml.", branch))
+			}
 		} else {
-			label = "primary"
+			fatal("instance not defined (missing --instance?).")
 		}
 	}
 	instance, err := api.Instances.Get(site, label)
