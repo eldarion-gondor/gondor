@@ -23,7 +23,7 @@ func deployCmd(ctx *cli.Context) {
 	instance := getInstance(ctx, api, nil)
 	source, ok := siteCfg.instances[instance.Label]
 	if !ok {
-		if len(ctx.Args()) < 2 {
+		if len(ctx.Args()) == 0 {
 			usage("too few arguments")
 		}
 		source = ctx.Args()[0]
