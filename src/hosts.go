@@ -10,17 +10,8 @@ import (
 )
 
 func hostsListCmd(ctx *cli.Context) {
-	usage := func(msg string) {
-		fmt.Println("Usage: gondor hosts list")
-		fatal(msg)
-	}
-	if len(ctx.Args()) == 0 {
-		usage("too few arguments")
-	}
-
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-
 	hostNames, err := api.HostNames.List(instance)
 	if err != nil {
 		fatal(err.Error())
@@ -38,18 +29,15 @@ func hostsListCmd(ctx *cli.Context) {
 
 func hostsCreateCmd(ctx *cli.Context) {
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor hosts create <hostname>")
+		fmt.Println("Usage: gondor hosts create [--instance] <hostname>")
 		fatal(msg)
 	}
 	if len(ctx.Args()) < 2 {
 		usage("too few arguments")
 	}
-
 	newHostName := ctx.Args()[0]
-
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-
 	hostName := gondor.HostName{
 		Instance: instance,
 		Host:     newHostName,
@@ -61,18 +49,15 @@ func hostsCreateCmd(ctx *cli.Context) {
 
 func hostsDeleteCmd(ctx *cli.Context) {
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor hosts delete <hostname>")
+		fmt.Println("Usage: gondor hosts delete [--instance] <hostname>")
 		fatal(msg)
 	}
 	if len(ctx.Args()) < 2 {
 		usage("too few arguments")
 	}
-
 	newHostName := ctx.Args()[0]
-
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-
 	hostName := gondor.HostName{
 		Instance: instance,
 		Host:     newHostName,
