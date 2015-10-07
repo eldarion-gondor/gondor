@@ -43,6 +43,7 @@ type Client struct {
 	EnvVars        *EnvironmentVariableResource
 	Logs           *LogResource
 	Metrics        *MetricResource
+	ScheduledTasks *ScheduledTaskResource
 
 	logHTTP bool
 }
@@ -73,6 +74,7 @@ func (c *Client) attachResources() {
 	c.EnvVars = &EnvironmentVariableResource{client: c}
 	c.Logs = &LogResource{client: c}
 	c.Metrics = &MetricResource{client: c}
+	c.ScheduledTasks = &ScheduledTaskResource{client: c}
 }
 
 func (c *Client) buildBaseURL(endpoint string) *url.URL {

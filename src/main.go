@@ -549,6 +549,67 @@ func main() {
 			},
 		},
 		{
+			Name:  "scheduled-tasks",
+			Usage: "manage scheduled tasks for an instance",
+			Action: func(ctx *cli.Context) {
+				checkVersion()
+				cli.ShowSubcommandHelp(ctx)
+			},
+			Subcommands: []cli.Command{
+				{
+					Name:  "list",
+					Usage: "List scheduled tasks for an instance",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
+					Action: stdCmd(scheduledTasksListCmd),
+				},
+				{
+					Name:  "create",
+					Usage: "Create a scheduled task for an instance",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+						cli.StringFlag{
+							Name:  "name",
+							Value: "",
+							Usage: "scheduled task name",
+						},
+						cli.StringFlag{
+							Name:  "timezone",
+							Value: "UTC",
+							Usage: "scheduled task timezone (default: UTC)",
+						},
+						cli.StringFlag{
+							Name:  "schedule",
+							Value: "",
+							Usage: "scheduled task schedule (cron syntax)",
+						},
+					},
+					Action: stdCmd(scheduledTasksCreateCmd),
+				},
+				{
+					Name:  "delete",
+					Usage: "Delete a scheduled task from an instance",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
+					Action: stdCmd(scheduledTasksDeleteCmd),
+				},
+			},
+		},
+		{
 			Name:  "pg",
 			Usage: "manage database",
 			Action: func(ctx *cli.Context) {
