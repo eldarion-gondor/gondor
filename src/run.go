@@ -22,10 +22,11 @@ func runCmd(ctx *cli.Context) {
 		fatal(err.Error())
 	}
 	re := remoteExec{
-		endpoint:   endpoint,
-		enableTty:  true,
-		httpClient: getHttpClient(ctx),
-		tlsConfig:  getTLSConfig(ctx),
+		endpoint:      endpoint,
+		enableTty:     true,
+		httpClient:    getHttpClient(ctx),
+		tlsConfig:     getTLSConfig(ctx),
+		showAttaching: true,
 	}
 	exitCode, err := re.execute()
 	if err != nil {

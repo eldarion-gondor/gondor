@@ -16,13 +16,22 @@ import (
 )
 
 type remoteExec struct {
-	endpoint   string
-	enableTty  bool
-	httpClient *http.Client
-	tlsConfig  *tls.Config
+	endpoint      string
+	enableTty     bool
+	httpClient    *http.Client
+	tlsConfig     *tls.Config
+	showAttaching bool
+	callback      func(bool, error)
 }
 
 func (re *remoteExec) execute() (int, error) {
+	if re.callback == nil {
+		re.callback = func(ok bool, err error) {
+			if err != nil {
+				failure(err.Error())
+			}
+		}
+	}
 	done := make(chan struct{}, 1)
 	var showIndicator bool
 	var outs io.Writer
@@ -33,7 +42,7 @@ func (re *remoteExec) execute() (int, error) {
 		outs = os.Stderr
 		showIndicator = true
 	}
-	if showIndicator {
+	if re.showAttaching && showIndicator {
 		s := spin.New()
 		s.Set(spin.Box1)
 		go func() {
@@ -68,9 +77,10 @@ func (re *remoteExec) execute() (int, error) {
 		return errors.New("non-200 response")
 	})); err != nil {
 		done <- struct{}{}
-		if showIndicator {
+		if re.showAttaching && showIndicator {
 			fmt.Fprintf(outs, "\r\033[36mAttaching...\033[m failed\n")
 		}
+		re.callback(false, nil)
 		return 1, err
 	}
 	return func() int {
@@ -103,16 +113,17 @@ func (re *remoteExec) execute() (int, error) {
 			}
 			return nil
 		})); err != nil {
-			if showIndicator {
+			if re.showAttaching && showIndicator {
 				fmt.Fprintf(outs, "\r\033[36mAttaching...\033[m error\n")
 			}
-			failure(err.Error())
+			re.callback(false, err)
 			return 1
 		}
 		done <- struct{}{}
-		if showIndicator {
+		if re.showAttaching && showIndicator {
 			fmt.Fprintf(outs, "\r\033[36mAttaching...\033[m ok\n")
 		}
+		re.callback(true, nil)
 		exitCode, err := pipe.Interact()
 		if err != nil {
 			failure(err.Error())
