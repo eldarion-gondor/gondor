@@ -32,7 +32,7 @@ func hostsCreateCmd(ctx *cli.Context) {
 		fmt.Println("Usage: gondor hosts create [--instance] <hostname>")
 		fatal(msg)
 	}
-	if len(ctx.Args()) < 2 {
+	if len(ctx.Args()) < 1 {
 		usage("too few arguments")
 	}
 	newHostName := ctx.Args()[0]
@@ -52,7 +52,7 @@ func hostsDeleteCmd(ctx *cli.Context) {
 		fmt.Println("Usage: gondor hosts delete [--instance] <hostname>")
 		fatal(msg)
 	}
-	if len(ctx.Args()) < 2 {
+	if len(ctx.Args()) < 1 {
 		usage("too few arguments")
 	}
 	newHostName := ctx.Args()[0]
