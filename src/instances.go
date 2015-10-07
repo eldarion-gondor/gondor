@@ -74,7 +74,7 @@ func instancesEnvCmd(ctx *cli.Context) {
 	var err error
 	var createMode bool
 	var displayEnvVars, desiredEnvVars []*gondor.EnvironmentVariable
-	if len(ctx.Args()) >= 2 {
+	if len(ctx.Args()) >= 1 {
 		createMode = true
 		for i := range ctx.Args() {
 			arg := ctx.Args()[i]
