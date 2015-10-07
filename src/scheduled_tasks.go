@@ -57,6 +57,7 @@ func scheduledTasksCreateCmd(ctx *cli.Context) {
 	if err := api.ScheduledTasks.Create(&scheduledTask); err != nil {
 		fatal(err.Error())
 	}
+	success(fmt.Sprintf("%s scheduled task has been created.", scheduledTask.Name))
 }
 
 func scheduledTasksDeleteCmd(ctx *cli.Context) {
@@ -69,7 +70,9 @@ func scheduledTasksDeleteCmd(ctx *cli.Context) {
 	}
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-	if err := api.ScheduledTasks.DeleteByName(instance, ctx.Args()[0]); err != nil {
+	name := ctx.Args()[0]
+	if err := api.ScheduledTasks.DeleteByName(instance, name); err != nil {
 		fatal(err.Error())
 	}
+	success(fmt.Sprintf("%s scheduled task has been deleted.", name))
 }
