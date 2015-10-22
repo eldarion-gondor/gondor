@@ -34,7 +34,7 @@ func stdCmd(cmdFunc func(*cli.Context)) func(*cli.Context) {
 	return func(ctx *cli.Context) {
 		checkVersion()
 		if !isAuthenticated() {
-			fatal("you are not authenticated. Run `gondor login` to authenticate.")
+			fatal("you are not authenticated. Run `g3a login` to authenticate.")
 		}
 		// there are some cases when the command gets called within bash
 		// autocomplete which can be a bad thing!
@@ -787,7 +787,7 @@ func checkVersion() {
 		}
 		if newVersion != nil {
 			fmt.Fprintf(outs, heyYou(fmt.Sprintf(
-				"You are using an older version (%s; latest: %s) of this client.\nTo upgrade run `gondor upgrade`.\n",
+				"You are using an older version (%s; latest: %s) of this client.\nTo upgrade run `g3a upgrade`.\n",
 				app.Version,
 				newVersion.Version,
 			)))
