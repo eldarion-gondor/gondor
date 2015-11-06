@@ -196,7 +196,7 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						resourceGroup := getResourceGroup(ctx, api)
-						keypairs, err := api.KeyPairs.List(resourceGroup)
+						keypairs, err := api.KeyPairs.List(&*resourceGroup.URL)
 						if err != nil {
 							return
 						}
@@ -247,7 +247,7 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						resourceGroup := getResourceGroup(ctx, api)
-						sites, err := api.Sites.List(resourceGroup)
+						sites, err := api.Sites.List(&*resourceGroup.URL)
 						if err != nil {
 							return
 						}
@@ -266,7 +266,7 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						resourceGroup := getResourceGroup(ctx, api)
-						sites, err := api.Sites.List(resourceGroup)
+						sites, err := api.Sites.List(&*resourceGroup.URL)
 						if err != nil {
 							return
 						}
@@ -339,8 +339,12 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						site := getSite(ctx, api)
-						for i := range site.Instances {
-							fmt.Println(site.Instances[i].Label)
+						instances, err := api.Instances.List(&*site.URL)
+						if err != nil {
+							fatal(err.Error())
+						}
+						for i := range instances {
+							fmt.Println(*instances[i].Label)
 						}
 					},
 				},
@@ -354,8 +358,12 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						site := getSite(ctx, api)
-						for i := range site.Instances {
-							fmt.Println(site.Instances[i].Label)
+						instances, err := api.Instances.List(&*site.URL)
+						if err != nil {
+							fatal(err.Error())
+						}
+						for i := range instances {
+							fmt.Println(*instances[i].Label)
 						}
 					},
 				},
@@ -420,8 +428,12 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						instance := getInstance(ctx, api, nil)
-						for i := range instance.Services {
-							fmt.Println(instance.Services[i].Name)
+						services, err := api.Services.List(&*instance.URL)
+						if err != nil {
+							fatal(err.Error())
+						}
+						for i := range services {
+							fmt.Println(services[i].Name)
 						}
 					},
 				},
@@ -435,8 +447,12 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						instance := getInstance(ctx, api, nil)
-						for i := range instance.Services {
-							fmt.Println(instance.Services[i].Name)
+						services, err := api.Services.List(&*instance.URL)
+						if err != nil {
+							fatal(err.Error())
+						}
+						for i := range services {
+							fmt.Println(services[i].Name)
 						}
 					},
 				},
@@ -456,8 +472,12 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						instance := getInstance(ctx, api, nil)
-						for i := range instance.Services {
-							fmt.Println(instance.Services[i].Name)
+						services, err := api.Services.List(&*instance.URL)
+						if err != nil {
+							fatal(err.Error())
+						}
+						for i := range services {
+							fmt.Println(services[i].Name)
 						}
 					},
 				},
@@ -471,8 +491,12 @@ func main() {
 						}
 						api := getAPIClient(ctx)
 						instance := getInstance(ctx, api, nil)
-						for i := range instance.Services {
-							fmt.Println(instance.Services[i].Name)
+						services, err := api.Services.List(&*instance.URL)
+						if err != nil {
+							fatal(err.Error())
+						}
+						for i := range services {
+							fmt.Println(services[i].Name)
 						}
 					},
 				},
@@ -665,8 +689,12 @@ func main() {
 				}
 				api := getAPIClient(ctx)
 				instance := getInstance(ctx, api, nil)
-				for i := range instance.Services {
-					fmt.Println(instance.Services[i].Name)
+				services, err := api.Services.List(&*instance.URL)
+				if err != nil {
+					fatal(err.Error())
+				}
+				for i := range services {
+					fmt.Println(services[i].Name)
 				}
 			},
 		},
@@ -682,15 +710,15 @@ func main() {
 				parts := strings.Split(ctx.Args()[0], "/")
 				instanceLabel := parts[0]
 				serviceName := parts[1]
-				instance, err := api.Instances.Get(site, instanceLabel)
+				instance, err := api.Instances.Get(*site.URL, instanceLabel)
 				if err != nil {
 					fatal(err.Error())
 				}
-				service, err := api.Services.Get(instance, serviceName)
+				service, err := api.Services.Get(*instance.URL, serviceName)
 				if err != nil {
 					fatal(err.Error())
 				}
-				series, err := api.Metrics.List(service)
+				series, err := api.Metrics.List(*service.URL)
 				if err != nil {
 					fatal(err.Error())
 				}
@@ -699,7 +727,7 @@ func main() {
 					fmt.Printf("%s = ", s.Name)
 					for j := range s.Points {
 						value := s.Points[j][2]
-						switch s.Name {
+						switch *s.Name {
 						case "filesystem/limit_bytes_gauge", "filesystem/usage_bytes_gauge", "memory/usage_bytes_gauge", "memory/working_set_bytes_gauge":
 							fmt.Printf("%s ", bytefmt.ByteSize(uint64(value)))
 							break
@@ -878,7 +906,7 @@ func getSite(ctx *cli.Context, api *gondor.Client) *gondor.Site {
 		resourceGroup = getResourceGroup(ctx, api)
 		_, siteName = parseSiteIdentifier(siteCfg.Identifier)
 	}
-	site, err := api.Sites.Get(siteName, resourceGroup)
+	site, err := api.Sites.Get(siteName, &*resourceGroup.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -909,7 +937,7 @@ func getInstance(ctx *cli.Context, api *gondor.Client, site *gondor.Site) *gondo
 			fatal("instance not defined (missing --instance?).")
 		}
 	}
-	instance, err := api.Instances.Get(site, label)
+	instance, err := api.Instances.Get(*site.URL, label)
 	if err != nil {
 		fatal(err.Error())
 	}

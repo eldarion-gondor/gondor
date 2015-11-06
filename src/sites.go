@@ -17,7 +17,7 @@ func sitesListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 
-	sites, err := api.Sites.List(resourceGroup)
+	sites, err := api.Sites.List(&*resourceGroup.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -27,7 +27,7 @@ func sitesListCmd(ctx *cli.Context) {
 	for i := range sites {
 		site := sites[i]
 		table.Append([]string{
-			site.Name,
+			*site.Name,
 		})
 	}
 	table.Render()
@@ -39,23 +39,26 @@ func sitesInitCmd(ctx *cli.Context) {
 	}
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
+	name := ctx.String("name")
 	site := gondor.Site{
-		ResourceGroup: resourceGroup,
-		Name:          ctx.String("name"),
+		ResourceGroup: resourceGroup.URL,
+		Name:          &name,
 	}
 	if err := api.Sites.Create(&site); err != nil {
 		fatal(err.Error())
 	}
+	label := "primary"
+	kind := "production"
 	instance := gondor.Instance{
-		Site:  &site,
-		Label: "primary",
-		Kind:  "production",
+		Site:  site.URL,
+		Label: &label,
+		Kind:  &kind,
 	}
 	if err := api.Instances.Create(&instance); err != nil {
 		fatal(err.Error())
 	}
 	sc := SiteConfig{
-		Identifier: fmt.Sprintf("%s/%s", site.ResourceGroup.Name, site.Name),
+		Identifier: fmt.Sprintf("%s/%s", resourceGroup.Name, site.Name),
 		Branches:   map[string]string{"master": "primary"},
 	}
 	buf, err := yaml.Marshal(sc)
@@ -76,13 +79,13 @@ func sitesCreateCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 	site := gondor.Site{
-		ResourceGroup: resourceGroup,
-		Name:          name,
+		ResourceGroup: resourceGroup.URL,
+		Name:          &name,
 	}
 	if err := api.Sites.Create(&site); err != nil {
 		fatal(err.Error())
 	}
-	success(fmt.Sprintf("%q site created.", fmt.Sprintf("%s/%s", site.ResourceGroup.Name, site.Name)))
+	success(fmt.Sprintf("%q site created.", fmt.Sprintf("%s/%s", resourceGroup.Name, site.Name)))
 }
 
 func sitesDeleteCmd(ctx *cli.Context) {
@@ -96,11 +99,11 @@ func sitesDeleteCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
 	var site *gondor.Site
-	site, err := api.Sites.Get(ctx.Args()[0], resourceGroup)
+	site, err := api.Sites.Get(ctx.Args()[0], &*resourceGroup.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
-	if err := api.Sites.Delete(site); err != nil {
+	if err := api.Sites.Delete(*site.URL); err != nil {
 		fatal(err.Error())
 	}
 }
@@ -118,16 +121,16 @@ func sitesEnvCmd(ctx *cli.Context) {
 			if strings.Contains(arg, "=") {
 				parts := strings.Split(arg, "=")
 				envVar := gondor.EnvironmentVariable{
-					Site:  site,
-					Key:   parts[0],
-					Value: parts[1],
+					Site:  site.URL,
+					Key:   &parts[0],
+					Value: &parts[1],
 				}
 				desiredEnvVars = append(desiredEnvVars, &envVar)
 			}
 		}
 	}
 	if !createMode {
-		displayEnvVars, err = api.EnvVars.ListBySite(site)
+		displayEnvVars, err = api.EnvVars.ListBySite(*site.URL)
 		if err != nil {
 			fatal(err.Error())
 		}
@@ -148,13 +151,17 @@ func sitesEnvCmd(ctx *cli.Context) {
 func sitesUsersListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
+	users, err := site.GetUsers()
+	if err != nil {
+		fatal(err.Error())
+	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Username", "Role"})
-	for i := range site.Users {
-		user := site.Users[i]
+	for i := range users {
+		user := users[i]
 		table.Append([]string{
-			user.User.Username,
-			user.Role,
+			*user.Username,
+			*user.Role,
 		})
 	}
 	table.Render()

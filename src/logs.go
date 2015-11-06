@@ -21,7 +21,7 @@ func logsCmd(ctx *cli.Context) {
 	instance = getInstance(ctx, api, nil)
 
 	if len(ctx.Args()) == 1 {
-		service, err = api.Services.Get(instance, ctx.Args()[0])
+		service, err = api.Services.Get(*instance.URL, ctx.Args()[0])
 		if err != nil {
 			fatal(err.Error())
 		}
@@ -30,12 +30,12 @@ func logsCmd(ctx *cli.Context) {
 	var records []*gondor.LogRecord
 
 	if instance != nil && service == nil {
-		records, err = api.Logs.ListByInstance(instance, ctx.Int("lines"))
+		records, err = api.Logs.ListByInstance(*instance.URL, ctx.Int("lines"))
 		if err != nil {
 			fatal(err.Error())
 		}
 	} else if service != nil {
-		records, err = api.Logs.ListByService(service, ctx.Int("lines"))
+		records, err = api.Logs.ListByService(*service.URL, ctx.Int("lines"))
 		if err != nil {
 			fatal(err.Error())
 		}
@@ -45,7 +45,7 @@ func logsCmd(ctx *cli.Context) {
 
 	for i := range records {
 		record := records[i]
-		switch record.Stream {
+		switch *record.Stream {
 		case "stdout":
 			color = blue
 			break
@@ -57,10 +57,10 @@ func logsCmd(ctx *cli.Context) {
 			"%s %s\n",
 			color(fmt.Sprintf(
 				"[%s; %s]",
-				record.Timestamp,
-				record.Tag,
+				*record.Timestamp,
+				*record.Tag,
 			)),
-			strings.TrimSpace(record.Message),
+			strings.TrimSpace(*record.Message),
 		)
 	}
 }

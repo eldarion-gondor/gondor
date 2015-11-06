@@ -12,7 +12,7 @@ import (
 func hostsListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-	hostNames, err := api.HostNames.List(instance)
+	hostNames, err := api.HostNames.List(instance.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -21,7 +21,7 @@ func hostsListCmd(ctx *cli.Context) {
 	for i := range hostNames {
 		hostName := hostNames[i]
 		table.Append([]string{
-			hostName.Host,
+			*hostName.Host,
 		})
 	}
 	table.Render()
@@ -39,8 +39,8 @@ func hostsCreateCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	hostName := gondor.HostName{
-		Instance: instance,
-		Host:     newHostName,
+		Instance: instance.URL,
+		Host:     &newHostName,
 	}
 	if err := api.HostNames.Create(&hostName); err != nil {
 		fatal(err.Error())
@@ -60,8 +60,8 @@ func hostsDeleteCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	hostName := gondor.HostName{
-		Instance: instance,
-		Host:     newHostName,
+		Instance: instance.URL,
+		Host:     &newHostName,
 	}
 	if err := api.HostNames.Delete(&hostName); err != nil {
 		fatal(err.Error())

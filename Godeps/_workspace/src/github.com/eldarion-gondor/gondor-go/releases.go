@@ -1,39 +1,31 @@
 package gondor
 
-import (
-	"errors"
-	"net/url"
-)
+import "net/url"
 
 type ReleaseResource struct {
 	client *Client
 }
 
 type Release struct {
-	Instance Instance `json:"instance,omitempty"`
-	Tag      string   `json:"tag,omitempty"`
-	URL      string   `json:"url,omitempty"`
+	Instance *string `json:"instance,omitempty"`
+	Tag      *string `json:"tag,omitempty"`
+
+	URL *string `json:"url,omitempty"`
 
 	r *ReleaseResource
 }
 
-func (r *ReleaseResource) Create(instance *Instance) (*Release, error) {
+func (r *ReleaseResource) Create(release *Release) error {
 	url := r.client.buildBaseURL("releases/")
-	release := Release{
-		Instance: *instance,
-	}
-	_, err := r.client.Post(url, &release, &release)
+	_, err := r.client.Post(url, release, release)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &release, nil
+	return nil
 }
 
-func (r *ReleaseResource) Delete(release *Release) error {
-	if release.URL == "" {
-		return errors.New("missing release URL")
-	}
-	u, _ := url.Parse(release.URL)
+func (r *ReleaseResource) Delete(releaseURL string) error {
+	u, _ := url.Parse(releaseURL)
 	_, err := r.client.Delete(u, nil)
 	if err != nil {
 		return err

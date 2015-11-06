@@ -1,22 +1,19 @@
 package gondor
 
-import (
-	"errors"
-	"net/url"
-)
+import "net/url"
 
 type ScheduledTaskResource struct {
 	client *Client
 }
 
 type ScheduledTask struct {
-	Instance *Instance `json:"instance,omitempty"`
-	Name     string    `json:"name,omitempty"`
-	Schedule string    `json:"schedule,omitempty"`
-	Timezone string    `json:"timezone,omitempty"`
-	Command  string    `json:"command,omitempty"`
+	Instance *string `json:"instance,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Schedule *string `json:"schedule,omitempty"`
+	Timezone *string `json:"timezone,omitempty"`
+	Command  *string `json:"command,omitempty"`
 
-	URL string `json:"url,omitempty"`
+	URL *string `json:"url,omitempty"`
 
 	r *ScheduledTaskResource
 }
@@ -30,15 +27,11 @@ func (r *ScheduledTaskResource) Create(scheduledTask *ScheduledTask) error {
 	return nil
 }
 
-func (r *ScheduledTaskResource) List(instance *Instance) ([]*ScheduledTask, error) {
-	v := url.Values{}
-	if instance != nil {
-		v.Add("instance", instance.URL)
-	}
+func (r *ScheduledTaskResource) List(instanceURL *string) ([]*ScheduledTask, error) {
 	url := r.client.buildBaseURL("scheduled_tasks/")
 	q := url.Query()
-	if instance != nil {
-		q.Set("instance", instance.URL)
+	if instanceURL != nil {
+		q.Set("instance", *instanceURL)
 	}
 	url.RawQuery = q.Encode()
 	var res []*ScheduledTask
@@ -52,10 +45,10 @@ func (r *ScheduledTaskResource) List(instance *Instance) ([]*ScheduledTask, erro
 	return res, nil
 }
 
-func (r *ScheduledTaskResource) DeleteByName(instance *Instance, name string) error {
+func (r *ScheduledTaskResource) DeleteByName(instanceURL string, name string) error {
 	url := r.client.buildBaseURL("scheduled_tasks/find/")
 	q := url.Query()
-	q.Set("instance", instance.URL)
+	q.Set("instance", instanceURL)
 	q.Set("name", name)
 	url.RawQuery = q.Encode()
 	var res *ScheduledTask
@@ -63,14 +56,11 @@ func (r *ScheduledTaskResource) DeleteByName(instance *Instance, name string) er
 	if err != nil {
 		return err
 	}
-	return r.Delete(res)
+	return r.Delete(*res.URL)
 }
 
-func (r *ScheduledTaskResource) Delete(scheduledTask *ScheduledTask) error {
-	if scheduledTask.URL == "" {
-		return errors.New("scheduled task URL not defined")
-	}
-	u, _ := url.Parse(scheduledTask.URL)
+func (r *ScheduledTaskResource) Delete(scheduledTaskURL string) error {
+	u, _ := url.Parse(scheduledTaskURL)
 	_, err := r.client.Delete(u, nil)
 	if err != nil {
 		return err

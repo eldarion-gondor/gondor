@@ -20,10 +20,11 @@ func instancesCreateCmd(ctx *cli.Context) {
 	}
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
+	kind := ctx.String("kind")
 	instance := gondor.Instance{
-		Site:  site,
-		Label: ctx.Args()[0],
-		Kind:  ctx.String("kind"),
+		Site:  site.URL,
+		Label: &ctx.Args()[0],
+		Kind:  &kind,
 	}
 	if err := api.Instances.Create(&instance); err != nil {
 		fatal(err.Error())
@@ -34,14 +35,18 @@ func instancesCreateCmd(ctx *cli.Context) {
 func instancesListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
+	instances, err := api.Instances.List(site.URL)
+	if err != nil {
+		fatal(err.Error())
+	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Label", "Kind", "URL"})
-	for i := range site.Instances {
-		instance := site.Instances[i]
+	for i := range instances {
+		instance := instances[i]
 		table.Append([]string{
-			instance.Label,
-			instance.Kind,
-			instance.WebURL,
+			*instance.Label,
+			*instance.Kind,
+			*instance.WebURL,
 		})
 	}
 	table.Render()
@@ -58,11 +63,11 @@ func instancesDeleteCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	label := ctx.Args()[0]
-	instance, err := api.Instances.Get(site, label)
+	instance, err := api.Instances.Get(*site.URL, label)
 	if err != nil {
 		fatal(err.Error())
 	}
-	if err := api.Instances.Delete(instance); err != nil {
+	if err := api.Instances.Delete(*instance.URL); err != nil {
 		fatal(err.Error())
 	}
 	success(fmt.Sprintf("%s instance has been deleted.", label))
@@ -81,16 +86,16 @@ func instancesEnvCmd(ctx *cli.Context) {
 			if strings.Contains(arg, "=") {
 				parts := strings.Split(arg, "=")
 				envVar := gondor.EnvironmentVariable{
-					Instance: instance,
-					Key:      parts[0],
-					Value:    parts[1],
+					Instance: instance.URL,
+					Key:      &parts[0],
+					Value:    &parts[1],
 				}
 				desiredEnvVars = append(desiredEnvVars, &envVar)
 			}
 		}
 	}
 	if !createMode {
-		displayEnvVars, err = api.EnvVars.ListByInstance(instance)
+		displayEnvVars, err = api.EnvVars.ListByInstance(*instance.URL)
 		if err != nil {
 			fatal(err.Error())
 		}

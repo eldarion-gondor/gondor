@@ -18,7 +18,7 @@ func resourceGroupListCmd(ctx *cli.Context) {
 	for i := range resourceGroups {
 		resourceGroup := resourceGroups[i]
 		table.Append([]string{
-			resourceGroup.Name,
+			*resourceGroup.Name,
 		})
 	}
 	table.Render()

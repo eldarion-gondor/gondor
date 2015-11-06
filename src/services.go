@@ -21,13 +21,15 @@ func servicesCreateCmd(ctx *cli.Context) {
 	}
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
+	name := ctx.String("name")
 	service := gondor.Service{
-		Instance: instance,
-		Name:     ctx.String("name"),
-		Kind:     ctx.Args()[0],
+		Instance: instance.URL,
+		Name:     &name,
+		Kind:     &ctx.Args()[0],
 	}
 	if ctx.String("version") != "" {
-		service.Version = ctx.String("version")
+		version := ctx.String("version")
+		service.Version = &version
 	}
 	if err := api.Services.Create(&service); err != nil {
 		fatal(err.Error())
@@ -38,15 +40,19 @@ func servicesCreateCmd(ctx *cli.Context) {
 func servicesListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
+	services, err := api.Services.List(&*instance.URL)
+	if err != nil {
+		fatal(err.Error())
+	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Kind", "Replicas", "State"})
-	for i := range instance.Services {
-		service := instance.Services[i]
+	for i := range services {
+		service := services[i]
 		table.Append([]string{
-			service.Name,
-			service.Kind,
-			strconv.Itoa(service.Replicas),
-			service.State,
+			*service.Name,
+			*service.Kind,
+			strconv.Itoa(*service.Replicas),
+			*service.State,
 		})
 	}
 	table.Render()
@@ -63,11 +69,11 @@ func servicesDeleteCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	name := ctx.Args()[0]
-	service, err := api.Services.Get(instance, name)
+	service, err := api.Services.Get(*instance.URL, name)
 	if err != nil {
 		fatal(err.Error())
 	}
-	if err := api.Services.Delete(service); err != nil {
+	if err := api.Services.Delete(*service.URL); err != nil {
 		fatal(err.Error())
 	}
 	success(fmt.Sprintf("%s service has been deleted.", name))
@@ -84,7 +90,7 @@ func servicesEnvCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	name := ctx.Args()[0]
-	service, err := api.Services.Get(instance, name)
+	service, err := api.Services.Get(*instance.URL, name)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -97,16 +103,16 @@ func servicesEnvCmd(ctx *cli.Context) {
 			if strings.Contains(arg, "=") {
 				parts := strings.Split(arg, "=")
 				envVar := gondor.EnvironmentVariable{
-					Service: service,
-					Key:     parts[0],
-					Value:   parts[1],
+					Service: service.URL,
+					Key:     &parts[0],
+					Value:   &parts[1],
 				}
 				desiredEnvVars = append(desiredEnvVars, &envVar)
 			}
 		}
 	}
 	if !createMode {
-		displayEnvVars, err = api.EnvVars.ListByService(service)
+		displayEnvVars, err = api.EnvVars.ListByService(*service.URL)
 		for i := range displayEnvVars {
 			envVar := displayEnvVars[i]
 			fmt.Printf("%s=%s\n", envVar.Key, envVar.Value)
@@ -133,7 +139,7 @@ func servicesScaleCmd(ctx *cli.Context) {
 	instance := getInstance(ctx, api, nil)
 	name := ctx.Args()[0]
 	replicas := ctx.Int("replicas")
-	service, err := api.Services.Get(instance, name)
+	service, err := api.Services.Get(*instance.URL, name)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -154,7 +160,7 @@ func servicesRestartCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	name := ctx.Args()[0]
-	service, err := api.Services.Get(instance, name)
+	service, err := api.Services.Get(*instance.URL, name)
 	if err != nil {
 		fatal(err.Error())
 	}

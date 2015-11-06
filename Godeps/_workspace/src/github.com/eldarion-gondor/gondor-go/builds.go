@@ -14,25 +14,21 @@ type BuildResource struct {
 }
 
 type Build struct {
-	Instance *Instance `json:"instance,omitempty"`
-	Release  Release   `json:"release,omitempty"`
-	URL      string    `json:"url,omitempty"`
+	Instance *string `json:"instance,omitempty"`
+	Release  *string `json:"release,omitempty"`
+
+	URL *string `json:"url,omitempty"`
 
 	r *BuildResource
 }
 
-func (r *BuildResource) Create(instance *Instance, release *Release) (*Build, error) {
+func (r *BuildResource) Create(build *Build) error {
 	url := r.client.buildBaseURL("builds/")
-	build := Build{
-		Instance: instance,
-		Release:  *release,
-		r:        r,
-	}
-	_, err := r.client.Post(url, &build, &build)
+	_, err := r.client.Post(url, build, build)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &build, nil
+	return nil
 }
 
 func (build *Build) Perform(blob io.Reader) (string, error) {
@@ -52,7 +48,7 @@ func (build *Build) Perform(blob io.Reader) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("PUT", build.URL, blobFile)
+	req, err := http.NewRequest("PUT", *build.URL, blobFile)
 	if err != nil {
 		return "", err
 	}

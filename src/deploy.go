@@ -9,6 +9,7 @@ import (
 	"os/exec"
 
 	"github.com/codegangsta/cli"
+	"github.com/eldarion-gondor/gondor-go"
 	"github.com/pivotal-golang/bytefmt"
 )
 
@@ -21,7 +22,7 @@ func deployCmd(ctx *cli.Context) {
 	var source string
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-	source, ok := siteCfg.instances[instance.Label]
+	source, ok := siteCfg.instances[*instance.Label]
 	if !ok {
 		if len(ctx.Args()) == 0 {
 			usage("too few arguments")
@@ -31,13 +32,15 @@ func deployCmd(ctx *cli.Context) {
 	fmt.Printf("-----> Preparing deployment of %s to %s\n", source, instance.Label)
 	fmt.Printf("       Creating release... ")
 	// 1. create a release for the instance
-	release, err := api.Releases.Create(instance)
-	if err != nil {
+	release := &gondor.Release{
+		Instance: instance.URL,
+	}
+	if err := api.Releases.Create(release); err != nil {
 		fatal(err.Error())
 	}
 	fmt.Printf("%s\n", release.Tag)
 	cleanup := func(err error) {
-		if err := api.Releases.Delete(release); err != nil {
+		if err := api.Releases.Delete(*release.URL); err != nil {
 			fatal(err.Error())
 		}
 		if err != nil {
@@ -45,8 +48,11 @@ func deployCmd(ctx *cli.Context) {
 		}
 	}
 	// 2. create a build
-	build, err := api.Builds.Create(instance, release)
-	if err != nil {
+	build := &gondor.Build{
+		Instance: instance.URL,
+		Release:  release.URL,
+	}
+	if err := api.Builds.Create(build); err != nil {
 		cleanup(err)
 	}
 	// 3. perform build from source blob
@@ -131,8 +137,11 @@ func deployCmd(ctx *cli.Context) {
 	}
 	// 4. create a deployment for the instance pointed at the release
 	fmt.Printf("\n-----> Deploying... ")
-	deployment, err := api.Deployments.Create(instance, release)
-	if err != nil {
+	deployment := &gondor.Deployment{
+		Instance: instance.URL,
+		Release:  release.URL,
+	}
+	if err := api.Deployments.Create(deployment); err != nil {
 		fmt.Println("failed")
 		fmt.Printf("       %s\n", err)
 		os.Exit(1)

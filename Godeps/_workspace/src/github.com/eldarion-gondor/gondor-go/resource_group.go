@@ -1,7 +1,6 @@
 package gondor
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 )
@@ -11,10 +10,10 @@ type ResourceGroupResource struct {
 }
 
 type ResourceGroup struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID   *int    `json:"id"`
+	Name *string `json:"name"`
 
-	URL string `json:"url"`
+	URL *string `json:"url"`
 
 	r *ResourceGroupResource
 }
@@ -27,6 +26,14 @@ func (r *ResourceGroupResource) findOne(url *url.URL) (*ResourceGroup, error) {
 	}
 	res.r = r
 	return res, nil
+}
+
+func (r *ResourceGroupResource) GetFromURL(value string) (*ResourceGroup, error) {
+	u, err := url.Parse(value)
+	if err != nil {
+		return nil, err
+	}
+	return r.findOne(u)
 }
 
 func (r *ResourceGroupResource) GetByName(name string) (*ResourceGroup, error) {
@@ -51,11 +58,8 @@ func (r *ResourceGroupResource) List() ([]*ResourceGroup, error) {
 	return res, nil
 }
 
-func (r *ResourceGroupResource) Delete(resourceGroup *ResourceGroup) error {
-	if resourceGroup.URL == "" {
-		return errors.New("missing resource group URL")
-	}
-	u, _ := url.Parse(resourceGroup.URL)
+func (r *ResourceGroupResource) Delete(resourceGroupURL string) error {
+	u, _ := url.Parse(resourceGroupURL)
 	_, err := r.client.Delete(u, nil)
 	if err != nil {
 		return err

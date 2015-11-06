@@ -7,10 +7,10 @@ type HostNameResource struct {
 }
 
 type HostName struct {
-	Instance *Instance `json:"instance,omitempty"`
-	Host     string    `json:"host,omitempty"`
+	Instance *string `json:"instance,omitempty"`
+	Host     *string `json:"host,omitempty"`
 
-	URL string `json:"url,omitempty"`
+	URL *string `json:"url,omitempty"`
 
 	r *HostNameResource
 }
@@ -24,15 +24,11 @@ func (r *HostNameResource) Create(hostName *HostName) error {
 	return nil
 }
 
-func (r *HostNameResource) List(instance *Instance) ([]*HostName, error) {
-	v := url.Values{}
-	if instance != nil {
-		v.Add("instance", instance.URL)
-	}
+func (r *HostNameResource) List(instanceURL *string) ([]*HostName, error) {
 	url := r.client.buildBaseURL("hosts/")
 	q := url.Query()
-	if instance != nil {
-		q.Set("instance", instance.URL)
+	if instanceURL != nil {
+		q.Set("instance", *instanceURL)
 	}
 	url.RawQuery = q.Encode()
 	var res []*HostName
@@ -58,7 +54,7 @@ func (r *HostNameResource) Delete(hostName *HostName) error {
 			break
 		}
 	}
-	u, _ := url.Parse(foundHostName.URL)
+	u, _ := url.Parse(*foundHostName.URL)
 	_, err = r.client.Delete(u, nil)
 	if err != nil {
 		return err
