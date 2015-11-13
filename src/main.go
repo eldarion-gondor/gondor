@@ -345,8 +345,15 @@ func main() {
 					},
 				},
 				{
-					Name:   "env",
-					Usage:  "",
+					Name:  "env",
+					Usage: "",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "instance",
+							Value: "",
+							Usage: "instance label",
+						},
+					},
 					Action: stdCmd(instancesEnvCmd),
 					BashComplete: func(ctx *cli.Context) {
 						if len(ctx.Args()) > 0 {
