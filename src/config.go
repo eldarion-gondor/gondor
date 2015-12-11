@@ -114,9 +114,14 @@ func (cfg *GlobalConfig) Save() error {
 	return nil
 }
 
+type instanceMapping struct {
+	Instance string   `yaml:"instance"`
+	Services []string `yaml:"services"`
+}
+
 type SiteConfig struct {
-	Identifier string            `yaml:"site"`
-	Branches   map[string]string `yaml:"branches,omitempty"`
+	Identifier string                     `yaml:"site"`
+	Branches   map[string]instanceMapping `yaml:"branches,omitempty"`
 
 	instances map[string]string
 
@@ -161,7 +166,7 @@ func LoadSiteConfig() error {
 	// reverse the branches mapping
 	siteCfg.instances = make(map[string]string)
 	for branch := range siteCfg.Branches {
-		siteCfg.instances[siteCfg.Branches[branch]] = branch
+		siteCfg.instances[siteCfg.Branches[branch].Instance] = branch
 	}
 	siteCfg.loaded = true
 	return nil

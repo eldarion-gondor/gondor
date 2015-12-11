@@ -57,9 +57,21 @@ func sitesInitCmd(ctx *cli.Context) {
 	if err := api.Instances.Create(&instance); err != nil {
 		fatal(err.Error())
 	}
+	serviceKind := "web"
+	service := gondor.Service{
+		Kind: &serviceKind,
+	}
+	if err := api.Services.Create(&service); err != nil {
+		fatal(err.Error())
+	}
 	sc := SiteConfig{
 		Identifier: fmt.Sprintf("%s/%s", resourceGroup.Name, site.Name),
-		Branches:   map[string]string{"master": "primary"},
+		Branches: map[string]instanceMapping{
+			"master": instanceMapping{
+				Instance: "primary",
+				Services: []string{*service.Name},
+			},
+		},
 	}
 	buf, err := yaml.Marshal(sc)
 	if err != nil {

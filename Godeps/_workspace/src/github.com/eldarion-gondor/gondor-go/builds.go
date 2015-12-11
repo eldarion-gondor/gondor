@@ -14,8 +14,9 @@ type BuildResource struct {
 }
 
 type Build struct {
-	Instance *string `json:"instance,omitempty"`
-	Release  *string `json:"release,omitempty"`
+	Site    *string `json:"site,omitempty"`
+	Service *string `json:"service,omitempty"`
+	Label   *string `json:"label,omitempty"`
 
 	URL *string `json:"url,omitempty"`
 

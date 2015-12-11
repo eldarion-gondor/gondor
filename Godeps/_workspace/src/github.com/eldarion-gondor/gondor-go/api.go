@@ -34,7 +34,6 @@ type Client struct {
 	ResourceGroups *ResourceGroupResource
 	Sites          *SiteResource
 	Instances      *InstanceResource
-	Releases       *ReleaseResource
 	Services       *ServiceResource
 	Builds         *BuildResource
 	Deployments    *DeploymentResource
@@ -65,7 +64,6 @@ func (c *Client) attachResources() {
 	c.ResourceGroups = &ResourceGroupResource{client: c}
 	c.Sites = &SiteResource{client: c}
 	c.Instances = &InstanceResource{client: c}
-	c.Releases = &ReleaseResource{client: c}
 	c.Services = &ServiceResource{client: c}
 	c.Builds = &BuildResource{client: c}
 	c.Deployments = &DeploymentResource{client: c}

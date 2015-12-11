@@ -21,6 +21,7 @@ func deployCmd(ctx *cli.Context) {
 	// 0. prepare API
 	var source string
 	api := getAPIClient(ctx)
+	site := getSite(ctx, api)
 	instance := getInstance(ctx, api, nil)
 	source, ok := siteCfg.instances[*instance.Label]
 	if !ok {
@@ -31,31 +32,19 @@ func deployCmd(ctx *cli.Context) {
 	}
 	fmt.Printf("-----> Preparing deployment of %s to %s\n", source, instance.Label)
 	fmt.Printf("       Creating release... ")
-	// 1. create a release for the instance
-	release := &gondor.Release{
-		Instance: instance.URL,
-	}
-	if err := api.Releases.Create(release); err != nil {
-		fatal(err.Error())
-	}
-	fmt.Printf("%s\n", release.Tag)
 	cleanup := func(err error) {
-		if err := api.Releases.Delete(*release.URL); err != nil {
-			fatal(err.Error())
-		}
 		if err != nil {
 			fatal(err.Error())
 		}
 	}
-	// 2. create a build
+	// 1. create a build
 	build := &gondor.Build{
-		Instance: instance.URL,
-		Release:  release.URL,
+		Site: site.URL,
 	}
 	if err := api.Builds.Create(build); err != nil {
 		cleanup(err)
 	}
-	// 3. perform build from source blob
+	// 2. perform build from source blob
 	fmt.Printf("       Running git archive --format=tar %s... ", source)
 	f, err := ioutil.TempFile("", "g3a-")
 	if err != nil {
@@ -135,18 +124,33 @@ func deployCmd(ctx *cli.Context) {
 	if exitCode > 0 {
 		os.Exit(exitCode)
 	}
-	// 4. create a deployment for the instance pointed at the release
+	// 3. create a deployment for the instance pointed at the release
 	fmt.Printf("\n-----> Deploying... ")
-	deployment := &gondor.Deployment{
-		Instance: instance.URL,
-		Release:  release.URL,
+	errc := make(chan error)
+	im := siteCfg.Branches[source]
+	for _, serviceName := range im.Services {
+		service, err := api.Services.Get(*instance.URL, serviceName)
+		if err != nil {
+			fmt.Println("error")
+			fmt.Printf("       %s\n", err)
+			os.Exit(1)
+		}
+		go func() {
+			deployment := &gondor.Deployment{
+				Service: service.URL,
+			}
+			if err := api.Deployments.Create(deployment); err != nil {
+				errc <- err
+				return
+			}
+			if err := deployment.Wait(); err != nil {
+				errc <- err
+				return
+			}
+			errc <- nil
+		}()
 	}
-	if err := api.Deployments.Create(deployment); err != nil {
-		fmt.Println("failed")
-		fmt.Printf("       %s\n", err)
-		os.Exit(1)
-	}
-	if err := deployment.Wait(); err != nil {
+	if err := <-errc; err != nil {
 		fmt.Println("error")
 		fmt.Printf("       %s\n", err)
 		os.Exit(1)
