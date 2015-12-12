@@ -150,6 +150,7 @@ func deployCmd(ctx *cli.Context) {
 		go func() {
 			deployment := &gondor.Deployment{
 				Service: service.URL,
+				Build:   build.URL,
 			}
 			if err := api.Deployments.Create(deployment); err != nil {
 				errc <- err

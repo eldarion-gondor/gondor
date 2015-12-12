@@ -8,6 +8,7 @@ type DeploymentResource struct {
 
 type Deployment struct {
 	Service *string `json:"service,omitempty"`
+	Build   *string `json:"build,omitempty"`
 
 	URL *string `json:"url,omitempty"`
 
