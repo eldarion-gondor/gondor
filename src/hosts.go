@@ -45,7 +45,7 @@ func hostsCreateCmd(ctx *cli.Context) {
 	if err := api.HostNames.Create(&hostName); err != nil {
 		fatal(err.Error())
 	}
-	success(fmt.Sprintf("%s host has been created.", hostName.Host))
+	success(fmt.Sprintf("%s host has been created.", *hostName.Host))
 }
 
 func hostsDeleteCmd(ctx *cli.Context) {
@@ -66,5 +66,5 @@ func hostsDeleteCmd(ctx *cli.Context) {
 	if err := api.HostNames.Delete(&hostName); err != nil {
 		fatal(err.Error())
 	}
-	success(fmt.Sprintf("%s instance has been deleted.", hostName.Host))
+	success(fmt.Sprintf("%s instance has been deleted.", *hostName.Host))
 }

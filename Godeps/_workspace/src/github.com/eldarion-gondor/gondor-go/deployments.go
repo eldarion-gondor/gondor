@@ -20,6 +20,7 @@ func (r *DeploymentResource) Create(deployment *Deployment) error {
 	if err != nil {
 		return err
 	}
+	deployment.r = r
 	return nil
 }
 

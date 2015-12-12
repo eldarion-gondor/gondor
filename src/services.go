@@ -115,14 +115,14 @@ func servicesEnvCmd(ctx *cli.Context) {
 		displayEnvVars, err = api.EnvVars.ListByService(*service.URL)
 		for i := range displayEnvVars {
 			envVar := displayEnvVars[i]
-			fmt.Printf("%s=%s\n", envVar.Key, envVar.Value)
+			fmt.Printf("%s=%s\n", *envVar.Key, *envVar.Value)
 		}
 	} else {
 		if err := api.EnvVars.Create(desiredEnvVars); err != nil {
 			fatal(err.Error())
 		}
 		for i := range desiredEnvVars {
-			fmt.Printf("%s=%s\n", desiredEnvVars[i].Key, desiredEnvVars[i].Value)
+			fmt.Printf("%s=%s\n", *desiredEnvVars[i].Key, *desiredEnvVars[i].Value)
 		}
 	}
 }

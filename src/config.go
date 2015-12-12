@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/eldarion-gondor/gondor-go"
 
@@ -114,19 +116,26 @@ func (cfg *GlobalConfig) Save() error {
 	return nil
 }
 
-type instanceMapping struct {
-	Instance string   `yaml:"instance"`
+type DeployConfig struct {
 	Services []string `yaml:"services"`
 }
 
+type VCSMetadata struct {
+	Branch string
+	Commit string
+}
+
 type SiteConfig struct {
-	Identifier string                     `yaml:"site"`
-	Branches   map[string]instanceMapping `yaml:"branches,omitempty"`
+	Identifier   string            `yaml:"site"`
+	BuildpackURL string            `yaml:"buildpack,omitempty"`
+	Branches     map[string]string `yaml:"branches,omitempty"`
+	Deploy       *DeployConfig     `yaml:"deploy,omitempty"`
 
 	instances map[string]string
 
 	loaded   bool
 	filename string
+	vcs      VCSMetadata
 }
 
 var siteCfg SiteConfig
@@ -163,10 +172,28 @@ func LoadSiteConfig() error {
 	if err := LoadSiteConfigFromFile(filename, &siteCfg); err != nil {
 		return err
 	}
+	// git metadata
+	var branch string
+	output, err := exec.Command("git", "symbolic-ref", "HEAD").Output()
+	if err == nil {
+		bits := strings.Split(strings.TrimSpace(string(output)), "/")
+		if len(bits) == 3 {
+			branch = bits[2]
+		}
+	}
+	var commit string
+	output, err = exec.Command("git", "rev-parse", branch).Output()
+	if err == nil {
+		commit = strings.TrimSpace(string(output))
+	}
+	siteCfg.vcs = VCSMetadata{
+		Branch: branch,
+		Commit: commit,
+	}
 	// reverse the branches mapping
 	siteCfg.instances = make(map[string]string)
 	for branch := range siteCfg.Branches {
-		siteCfg.instances[siteCfg.Branches[branch].Instance] = branch
+		siteCfg.instances[siteCfg.Branches[branch]] = branch
 	}
 	siteCfg.loaded = true
 	return nil

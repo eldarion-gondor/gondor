@@ -66,11 +66,9 @@ func sitesInitCmd(ctx *cli.Context) {
 	}
 	sc := SiteConfig{
 		Identifier: fmt.Sprintf("%s/%s", resourceGroup.Name, site.Name),
-		Branches: map[string]instanceMapping{
-			"master": instanceMapping{
-				Instance: "primary",
-				Services: []string{*service.Name},
-			},
+		Branches:   map[string]string{"master": "primary"},
+		Deploy: &DeployConfig{
+			Services: []string{*service.Name},
 		},
 	}
 	buf, err := yaml.Marshal(sc)
@@ -148,14 +146,14 @@ func sitesEnvCmd(ctx *cli.Context) {
 		}
 		for i := range displayEnvVars {
 			envVar := displayEnvVars[i]
-			fmt.Printf("%s=%s\n", envVar.Key, envVar.Value)
+			fmt.Printf("%s=%s\n", *envVar.Key, *envVar.Value)
 		}
 	} else {
 		if err := api.EnvVars.Create(desiredEnvVars); err != nil {
 			fatal(err.Error())
 		}
 		for i := range desiredEnvVars {
-			fmt.Printf("%s=%s\n", desiredEnvVars[i].Key, desiredEnvVars[i].Value)
+			fmt.Printf("%s=%s\n", *desiredEnvVars[i].Key, *desiredEnvVars[i].Value)
 		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/codegangsta/cli"
 	"github.com/eldarion-gondor/gondor-go"
@@ -14,24 +15,34 @@ import (
 )
 
 func deployCmd(ctx *cli.Context) {
-	usage := func(msg string) {
-		fmt.Println("Usage: gondor deploy [--instance] [<git-ref>]")
-		fatal(msg)
-	}
 	// 0. prepare API
 	var source string
 	api := getAPIClient(ctx)
 	site := getSite(ctx, api)
 	instance := getInstance(ctx, api, nil)
-	source, ok := siteCfg.instances[*instance.Label]
-	if !ok {
-		if len(ctx.Args()) == 0 {
-			usage("too few arguments")
+	buildLabel := fmt.Sprintf("%s-%%s", filepath.Base(filepath.Dir(siteCfg.filename)))
+	if ctx.Args().First() != "" {
+		source = ctx.Args().First()
+		var sourceLabel string
+		if len(source) > 8 {
+			sourceLabel = source[:8]
+		} else {
+			sourceLabel = source
 		}
-		source = ctx.Args()[0]
+		buildLabel = fmt.Sprintf(buildLabel, sourceLabel)
+	} else {
+		var ok bool
+		source, ok = siteCfg.instances[*instance.Label]
+		if !ok {
+			fatal(fmt.Sprintf("no branch could be found for %s", *instance.Label))
+		} else {
+			buildLabel = fmt.Sprintf(buildLabel, fmt.Sprintf("%s-%s", siteCfg.vcs.Branch, siteCfg.vcs.Commit[:8]))
+		}
 	}
-	fmt.Printf("-----> Preparing deployment of %s to %s\n", source, instance.Label)
-	fmt.Printf("       Creating release... ")
+	if siteCfg.Deploy == nil {
+		fatal("gondor.yml is missing the deploy configuration.")
+	}
+	fmt.Printf("-----> Preparing build of %s (%s)\n", source, buildLabel)
 	cleanup := func(err error) {
 		if err != nil {
 			fatal(err.Error())
@@ -39,7 +50,9 @@ func deployCmd(ctx *cli.Context) {
 	}
 	// 1. create a build
 	build := &gondor.Build{
-		Site: site.URL,
+		Site:         site.URL,
+		Label:        &buildLabel,
+		BuildpackURL: &siteCfg.BuildpackURL,
 	}
 	if err := api.Builds.Create(build); err != nil {
 		cleanup(err)
@@ -125,10 +138,9 @@ func deployCmd(ctx *cli.Context) {
 		os.Exit(exitCode)
 	}
 	// 3. create a deployment for the instance pointed at the release
-	fmt.Printf("\n-----> Deploying... ")
+	fmt.Printf("\n-----> Deploying to %s... ", *instance.Label)
 	errc := make(chan error)
-	im := siteCfg.Branches[source]
-	for _, serviceName := range im.Services {
+	for _, serviceName := range siteCfg.Deploy.Services {
 		service, err := api.Services.Get(*instance.URL, serviceName)
 		if err != nil {
 			fmt.Println("error")

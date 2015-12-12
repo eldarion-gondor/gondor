@@ -61,7 +61,7 @@ func scheduledTasksCreateCmd(ctx *cli.Context) {
 	if err := api.ScheduledTasks.Create(&scheduledTask); err != nil {
 		fatal(err.Error())
 	}
-	success(fmt.Sprintf("%s scheduled task has been created.", scheduledTask.Name))
+	success(fmt.Sprintf("%s scheduled task has been created.", *scheduledTask.Name))
 }
 
 func scheduledTasksDeleteCmd(ctx *cli.Context) {

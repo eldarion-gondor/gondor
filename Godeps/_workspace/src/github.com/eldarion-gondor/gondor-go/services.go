@@ -3,6 +3,7 @@ package gondor
 import (
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 type ServiceResource struct {
@@ -17,6 +18,7 @@ type Service struct {
 	State    *string           `json:"state,omitempty"`
 	Env      map[string]string `json:"env,omitempty"`
 	KeyPair  *string           `json:"keypair,omitempty"`
+	WebURL   *string           `json:"web_url,omitempty"`
 
 	// create only
 	Version *string `json:"version,omitempty"`
@@ -77,7 +79,7 @@ func (r *ServiceResource) List(instanceURL *string) ([]*Service, error) {
 	}
 	url.RawQuery = q.Encode()
 	var res []*Service
-	_, err := r.client.Get(url, res)
+	_, err := r.client.Get(url, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -144,4 +146,21 @@ func (s *Service) DetachKeyPair() error {
 		return err
 	}
 	return nil
+}
+
+func (s *Service) Run(cmd []string) (string, error) {
+	u, _ := url.Parse(*s.URL + "run/")
+	up := struct {
+		Command string `json:"command,omitempty"`
+	}{
+		Command: strings.Join(cmd, " "),
+	}
+	down := struct {
+		Endpoint string `json:"endpoint"`
+	}{}
+	_, err := s.r.client.Post(u, &up, &down)
+	if err != nil {
+		return "", err
+	}
+	return down.Endpoint, nil
 }

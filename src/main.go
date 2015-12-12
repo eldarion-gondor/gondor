@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 
@@ -201,7 +200,7 @@ func main() {
 							return
 						}
 						for i := range keypairs {
-							fmt.Println(keypairs[i].Name)
+							fmt.Println(*keypairs[i].Name)
 						}
 					},
 				},
@@ -252,7 +251,7 @@ func main() {
 							return
 						}
 						for i := range sites {
-							fmt.Println(sites[i].Name)
+							fmt.Println(*sites[i].Name)
 						}
 					},
 				},
@@ -271,7 +270,7 @@ func main() {
 							return
 						}
 						for i := range sites {
-							fmt.Println(sites[i].Name)
+							fmt.Println(*sites[i].Name)
 						}
 					},
 				},
@@ -433,7 +432,7 @@ func main() {
 							fatal(err.Error())
 						}
 						for i := range services {
-							fmt.Println(services[i].Name)
+							fmt.Println(*services[i].Name)
 						}
 					},
 				},
@@ -452,7 +451,7 @@ func main() {
 							fatal(err.Error())
 						}
 						for i := range services {
-							fmt.Println(services[i].Name)
+							fmt.Println(*services[i].Name)
 						}
 					},
 				},
@@ -477,7 +476,7 @@ func main() {
 							fatal(err.Error())
 						}
 						for i := range services {
-							fmt.Println(services[i].Name)
+							fmt.Println(*services[i].Name)
 						}
 					},
 				},
@@ -496,7 +495,7 @@ func main() {
 							fatal(err.Error())
 						}
 						for i := range services {
-							fmt.Println(services[i].Name)
+							fmt.Println(*services[i].Name)
 						}
 					},
 				},
@@ -513,6 +512,20 @@ func main() {
 				},
 			},
 			Action: stdCmd(runCmd),
+			BashComplete: func(ctx *cli.Context) {
+				if len(ctx.Args()) > 0 {
+					return
+				}
+				api := getAPIClient(ctx)
+				instance := getInstance(ctx, api, nil)
+				services, err := api.Services.List(&*instance.URL)
+				if err != nil {
+					fatal(err.Error())
+				}
+				for i := range services {
+					fmt.Println(*services[i].Name)
+				}
+			},
 		},
 		{
 			Name:  "deploy",
@@ -634,31 +647,25 @@ func main() {
 			},
 		},
 		{
-			Name:  "pg",
-			Usage: "manage database",
-			Action: func(ctx *cli.Context) {
-				checkVersion()
-				cli.ShowSubcommandHelp(ctx)
-			},
-			Subcommands: []cli.Command{
-				{
-					Name:  "run",
-					Usage: "Run a one-off process against the database",
-					Flags: []cli.Flag{
-						cli.StringFlag{
-							Name:  "instance",
-							Value: "",
-							Usage: "instance label",
-						},
-					},
-					Action: stdCmd(pgRunCmd),
-				},
-			},
-		},
-		{
 			Name:   "open",
 			Usage:  "open instance URL in browser",
 			Action: stdCmd(openCmd),
+			BashComplete: func(ctx *cli.Context) {
+				if len(ctx.Args()) > 0 {
+					return
+				}
+				api := getAPIClient(ctx)
+				instance := getInstance(ctx, api, nil)
+				services, err := api.Services.List(&*instance.URL)
+				if err != nil {
+					fatal(err.Error())
+				}
+				for i := range services {
+					if *services[i].Kind == "web" {
+						fmt.Println(*services[i].Name)
+					}
+				}
+			},
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "instance",
@@ -694,7 +701,7 @@ func main() {
 					fatal(err.Error())
 				}
 				for i := range services {
-					fmt.Println(services[i].Name)
+					fmt.Println(*services[i].Name)
 				}
 			},
 		},
@@ -864,12 +871,15 @@ func getResourceGroup(ctx *cli.Context, api *gondor.Client) *gondor.ResourceGrou
 			fatal(err.Error())
 		}
 	} else {
-		if err := LoadSiteConfig(); err == nil {
+		var err error
+		if err = LoadSiteConfig(); err == nil {
 			resourceGroupName, _ := parseSiteIdentifier(siteCfg.Identifier)
 			resourceGroup, err = api.ResourceGroups.GetByName(resourceGroupName)
 			if err != nil {
 				fatal(err.Error())
 			}
+		} else if err != nil {
+			fatal(fmt.Sprintf("failed to load gondor.yml\n%s", err.Error()))
 		} else {
 			user, err := api.AuthenticatedUser()
 			if err != nil {
@@ -917,24 +927,15 @@ func getInstance(ctx *cli.Context, api *gondor.Client, site *gondor.Site) *gondo
 	if site == nil {
 		site = getSite(ctx, api)
 	}
-	var branch string
-	output, err := exec.Command("git", "symbolic-ref", "HEAD").Output()
-	if err == nil {
-		bits := strings.Split(strings.TrimSpace(string(output)), "/")
-		if len(bits) == 3 {
-			branch = bits[2]
-		}
-	}
+	branch := siteCfg.vcs.Branch
 	label := ctx.String("instance")
 	if label == "" {
 		if branch != "" {
-			var im instanceMapping
 			var ok bool
-			im, ok = siteCfg.Branches[branch]
+			label, ok = siteCfg.Branches[branch]
 			if !ok {
 				fatal(fmt.Sprintf("unable to map %q to an instance. Please provide --instance or map it to an instance in gondor.yml.", branch))
 			}
-			label = im.Instance
 		} else {
 			fatal("instance not defined (missing --instance?).")
 		}

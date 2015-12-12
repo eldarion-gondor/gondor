@@ -14,9 +14,10 @@ type BuildResource struct {
 }
 
 type Build struct {
-	Site    *string `json:"site,omitempty"`
-	Service *string `json:"service,omitempty"`
-	Label   *string `json:"label,omitempty"`
+	Site         *string `json:"site,omitempty"`
+	Service      *string `json:"service,omitempty"`
+	Label        *string `json:"label,omitempty"`
+	BuildpackURL *string `json:"buildpack_url,omitempty"`
 
 	URL *string `json:"url,omitempty"`
 
@@ -29,6 +30,7 @@ func (r *BuildResource) Create(build *Build) error {
 	if err != nil {
 		return err
 	}
+	build.r = r
 	return nil
 }
 

@@ -29,7 +29,7 @@ func instancesCreateCmd(ctx *cli.Context) {
 	if err := api.Instances.Create(&instance); err != nil {
 		fatal(err.Error())
 	}
-	success(fmt.Sprintf("%s instance has been created.", instance.Label))
+	success(fmt.Sprintf("%s instance has been created.", *instance.Label))
 }
 
 func instancesListCmd(ctx *cli.Context) {
@@ -40,13 +40,12 @@ func instancesListCmd(ctx *cli.Context) {
 		fatal(err.Error())
 	}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Label", "Kind", "URL"})
+	table.SetHeader([]string{"Label", "Kind"})
 	for i := range instances {
 		instance := instances[i]
 		table.Append([]string{
 			*instance.Label,
 			*instance.Kind,
-			*instance.WebURL,
 		})
 	}
 	table.Render()
@@ -101,14 +100,14 @@ func instancesEnvCmd(ctx *cli.Context) {
 		}
 		for i := range displayEnvVars {
 			envVar := displayEnvVars[i]
-			fmt.Printf("%s=%s\n", envVar.Key, envVar.Value)
+			fmt.Printf("%s=%s\n", *envVar.Key, *envVar.Value)
 		}
 	} else {
 		if err := api.EnvVars.Create(desiredEnvVars); err != nil {
 			fatal(err.Error())
 		}
 		for i := range desiredEnvVars {
-			fmt.Printf("%s=%s\n", desiredEnvVars[i].Key, desiredEnvVars[i].Value)
+			fmt.Printf("%s=%s\n", *desiredEnvVars[i].Key, *desiredEnvVars[i].Value)
 		}
 	}
 }
