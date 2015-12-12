@@ -10,5 +10,9 @@ import (
 func openCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-	open.Run(fmt.Sprintf("https://%s/", instance.WebURL))
+	service, err := api.Services.Get(*instance.URL, ctx.Args()[0])
+	if err != nil {
+		fatal(err.Error())
+	}
+	open.Run(fmt.Sprintf("https://%s/", *service.WebURL))
 }

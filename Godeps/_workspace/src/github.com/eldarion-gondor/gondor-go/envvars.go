@@ -7,13 +7,13 @@ type EnvironmentVariableResource struct {
 }
 
 type EnvironmentVariable struct {
-	Site     *Site     `json:"site,omitempty"`
-	Instance *Instance `json:"instance,omitempty"`
-	Service  *Service  `json:"service,omitempty"`
-	Key      string    `json:"key,omitempty"`
-	Value    string    `json:"value,omitempty"`
+	Site     *string `json:"site,omitempty"`
+	Instance *string `json:"instance,omitempty"`
+	Service  *string `json:"service,omitempty"`
+	Key      *string `json:"key,omitempty"`
+	Value    *string `json:"value,omitempty"`
 
-	URL string `json:"url,omitempty"`
+	URL *string `json:"url,omitempty"`
 
 	r *EnvironmentVariableResource
 }
@@ -39,26 +39,26 @@ func (r *EnvironmentVariableResource) Create(envVars []*EnvironmentVariable) err
 	return nil
 }
 
-func (r *EnvironmentVariableResource) ListBySite(site *Site) ([]*EnvironmentVariable, error) {
+func (r *EnvironmentVariableResource) ListBySite(siteURL string) ([]*EnvironmentVariable, error) {
 	url := r.client.buildBaseURL("envvars/")
 	q := url.Query()
-	q.Set("site", site.URL)
+	q.Set("site", siteURL)
 	url.RawQuery = q.Encode()
 	return r.findMany(url)
 }
 
-func (r *EnvironmentVariableResource) ListByInstance(instance *Instance) ([]*EnvironmentVariable, error) {
+func (r *EnvironmentVariableResource) ListByInstance(instanceURL string) ([]*EnvironmentVariable, error) {
 	url := r.client.buildBaseURL("envvars/")
 	q := url.Query()
-	q.Set("instance", instance.URL)
+	q.Set("instance", instanceURL)
 	url.RawQuery = q.Encode()
 	return r.findMany(url)
 }
 
-func (r *EnvironmentVariableResource) ListByService(service *Service) ([]*EnvironmentVariable, error) {
+func (r *EnvironmentVariableResource) ListByService(serviceURL string) ([]*EnvironmentVariable, error) {
 	url := r.client.buildBaseURL("envvars/")
 	q := url.Query()
-	q.Set("service", service.URL)
+	q.Set("service", serviceURL)
 	url.RawQuery = q.Encode()
 	return r.findMany(url)
 }

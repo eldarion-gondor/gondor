@@ -9,7 +9,7 @@ import (
 
 func runCmd(ctx *cli.Context) {
 	usage := func(msg string) {
-		fmt.Println("Usage: gondor run [--instance] -- <executable> <arg-or-option>...")
+		fmt.Println("Usage: gondor run [--instance] <service-name> -- <executable> <arg-or-option>...")
 		fatal(msg)
 	}
 	if len(ctx.Args()) == 0 {
@@ -17,7 +17,11 @@ func runCmd(ctx *cli.Context) {
 	}
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-	endpoint, err := instance.Run("normal", ctx.Args())
+	service, err := api.Services.Get(*instance.URL, ctx.Args()[0])
+	if err != nil {
+		fatal(err.Error())
+	}
+	endpoint, err := service.Run(ctx.Args()[1:])
 	if err != nil {
 		fatal(err.Error())
 	}

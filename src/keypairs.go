@@ -13,26 +13,18 @@ import (
 func keypairsListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
-
-	keypairs, err := api.KeyPairs.List(resourceGroup)
+	keypairs, err := api.KeyPairs.List(resourceGroup.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
-
 	table := tablewriter.NewWriter(os.Stdout)
 	header := []string{}
-	if resourceGroup == nil {
-		header = append(header, "Resource Group")
-	}
 	header = append(header, "Name")
 	table.SetHeader(header)
 	for i := range keypairs {
 		keypair := keypairs[i]
 		row := []string{}
-		if resourceGroup == nil {
-			row = append(row, keypair.ResourceGroup.Name)
-		}
-		row = append(row, keypair.Name)
+		row = append(row, *keypair.Name)
 		table.Append(row)
 	}
 	table.Render()
@@ -43,20 +35,17 @@ func keypairsCreateCmd(ctx *cli.Context) {
 		fmt.Println("Usage: gondor keypairs create --name=<keypair-name> <private-key-path> <certificate-path>")
 		fatal(msg)
 	}
-
 	if len(ctx.Args()) < 2 {
 		usage("too few arguments")
 	}
 	if !ctx.IsSet("name") || ctx.String("name") == "" {
 		usage("--name is required")
 	}
-
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
-
+	name := ctx.String("name")
 	privateKeyPath := ctx.Args()[0]
 	certPath := ctx.Args()[1]
-
 	privateKey, err := ioutil.ReadFile(privateKeyPath)
 	if err != nil {
 		fatal(err.Error())
@@ -65,10 +54,9 @@ func keypairsCreateCmd(ctx *cli.Context) {
 	if err != nil {
 		fatal(err.Error())
 	}
-
 	keypair := gondor.KeyPair{
-		ResourceGroup: resourceGroup,
-		Name:          ctx.String("name"),
+		ResourceGroup: resourceGroup.URL,
+		Name:          &name,
 		Key:           privateKey,
 		Certificate:   cert,
 	}
@@ -83,32 +71,27 @@ func keypairsAttachCmd(ctx *cli.Context) {
 		fmt.Println("Usage: gondor keypairs attach [--instance] --keypair=<keypair-name> --service=<name>")
 		fatal(msg)
 	}
-
 	if ctx.String("keypair") == "" {
 		usage("--keypair is required")
 	}
 	if ctx.String("service") == "" {
 		usage("--service is required")
 	}
-
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
-
-	keypair, err := api.KeyPairs.GetByName(ctx.String("keypair"), resourceGroup)
+	keypair, err := api.KeyPairs.GetByName(ctx.String("keypair"), resourceGroup.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
-
 	instance := getInstance(ctx, api, nil)
-	service, err := api.Services.Get(instance, ctx.String("service"))
+	service, err := api.Services.Get(*instance.URL, ctx.String("service"))
 	if err != nil {
 		fatal(err.Error())
 	}
-
 	// attach the keypair to the service
 	service = &gondor.Service{
 		URL:     service.URL,
-		KeyPair: keypair,
+		KeyPair: keypair.URL,
 	}
 	if err := api.Services.Update(*service); err != nil {
 		fatal(err.Error())
@@ -121,18 +104,15 @@ func keypairsDetachCmd(ctx *cli.Context) {
 		fmt.Println("Usage: gondor keypairs detach [--instance] --service=<name>")
 		fatal(msg)
 	}
-
 	if ctx.String("service") == "" {
 		usage("--service is required")
 	}
-
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-	service, err := api.Services.Get(instance, ctx.String("service"))
+	service, err := api.Services.Get(*instance.URL, ctx.String("service"))
 	if err != nil {
 		fatal(err.Error())
 	}
-
 	// detach the keypair from the service using custom struct to allow an empty
 	// keypair
 	if err := service.DetachKeyPair(); err != nil {
@@ -146,22 +126,17 @@ func keypairsDeleteCmd(ctx *cli.Context) {
 		fmt.Println("Usage: gondor keypairs delete <keypair-name>")
 		fatal(msg)
 	}
-
 	if len(ctx.Args()) == 0 {
 		usage("too few arguments")
 	}
-
 	api := getAPIClient(ctx)
 	resourceGroup := getResourceGroup(ctx, api)
-
-	keypair, err := api.KeyPairs.GetByName(ctx.Args()[0], resourceGroup)
+	keypair, err := api.KeyPairs.GetByName(ctx.Args()[0], resourceGroup.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
-
-	if err := api.KeyPairs.Delete(keypair); err != nil {
+	if err := api.KeyPairs.Delete(*keypair.URL); err != nil {
 		fatal(err.Error())
 	}
-
 	success("keypair deleted.")
 }

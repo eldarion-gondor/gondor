@@ -13,7 +13,7 @@ import (
 func scheduledTasksListCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
-	scheduledTasks, err := api.ScheduledTasks.List(instance)
+	scheduledTasks, err := api.ScheduledTasks.List(&*instance.URL)
 	if err != nil {
 		fatal(err.Error())
 	}
@@ -22,10 +22,10 @@ func scheduledTasksListCmd(ctx *cli.Context) {
 	for i := range scheduledTasks {
 		scheduledTask := scheduledTasks[i]
 		table.Append([]string{
-			scheduledTask.Name,
-			scheduledTask.Schedule,
-			scheduledTask.Timezone,
-			scheduledTask.Command,
+			*scheduledTask.Name,
+			*scheduledTask.Schedule,
+			*scheduledTask.Timezone,
+			*scheduledTask.Command,
 		})
 	}
 	table.Render()
@@ -47,17 +47,21 @@ func scheduledTasksCreateCmd(ctx *cli.Context) {
 	}
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
+	name := ctx.String("name")
+	schedule := ctx.String("schedule")
+	timezone := ctx.String("timezone")
+	command := strings.Join(ctx.Args(), " ")
 	scheduledTask := gondor.ScheduledTask{
-		Instance: instance,
-		Name:     ctx.String("name"),
-		Schedule: ctx.String("schedule"),
-		Timezone: ctx.String("timezone"),
-		Command:  strings.Join(ctx.Args(), " "),
+		Instance: instance.URL,
+		Name:     &name,
+		Schedule: &schedule,
+		Timezone: &timezone,
+		Command:  &command,
 	}
 	if err := api.ScheduledTasks.Create(&scheduledTask); err != nil {
 		fatal(err.Error())
 	}
-	success(fmt.Sprintf("%s scheduled task has been created.", scheduledTask.Name))
+	success(fmt.Sprintf("%s scheduled task has been created.", *scheduledTask.Name))
 }
 
 func scheduledTasksDeleteCmd(ctx *cli.Context) {
@@ -71,7 +75,7 @@ func scheduledTasksDeleteCmd(ctx *cli.Context) {
 	api := getAPIClient(ctx)
 	instance := getInstance(ctx, api, nil)
 	name := ctx.Args()[0]
-	if err := api.ScheduledTasks.DeleteByName(instance, name); err != nil {
+	if err := api.ScheduledTasks.DeleteByName(*instance.URL, name); err != nil {
 		fatal(err.Error())
 	}
 	success(fmt.Sprintf("%s scheduled task has been deleted.", name))

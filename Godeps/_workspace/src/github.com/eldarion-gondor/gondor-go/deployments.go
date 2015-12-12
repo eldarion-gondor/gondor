@@ -7,33 +7,31 @@ type DeploymentResource struct {
 }
 
 type Deployment struct {
-	Instance *Instance `json:"instance,omitempty"`
-	Release  Release   `json:"release,omitempty"`
-	URL      string    `json:"url,omitempty"`
+	Service *string `json:"service,omitempty"`
+
+	URL *string `json:"url,omitempty"`
 
 	r *DeploymentResource
 }
 
-func (r *DeploymentResource) Create(instance *Instance, release *Release) (*Deployment, error) {
+func (r *DeploymentResource) Create(deployment *Deployment) error {
 	url := r.client.buildBaseURL("deployments/")
-	deployment := Deployment{
-		Instance: instance,
-		Release:  *release,
-	}
-	_, err := r.client.Post(url, &deployment, &deployment)
+	_, err := r.client.Post(url, deployment, deployment)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &deployment, nil
+	deployment.r = r
+	return nil
 }
 
 func (d *Deployment) Wait() error {
 	timeout := 60 * 15
 	return WaitFor(timeout, func() (bool, error) {
-		if err := d.Instance.Load(); err != nil {
+		service, err := d.r.client.Services.GetFromURL(*d.Service)
+		if err != nil {
 			return false, err
 		}
-		switch d.Instance.State {
+		switch *service.State {
 		case "running":
 			return true, nil
 		case "deploying":
