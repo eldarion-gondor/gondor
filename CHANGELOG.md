@@ -9,9 +9,11 @@ Gondor, this release is not fully backward compatible.
 
 * `gondor.yml` requires a `deploy` config:
 
-       deploy:
-         services:
-           - web
+  ```
+  deploy:
+    services:
+      - web
+  ```
 
   This tells the deploy command which services to target with the build.
 
