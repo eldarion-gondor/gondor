@@ -12,10 +12,10 @@ Gondor, this release is not fully backward compatible.
   ```
   deploy:
     services:
-      - web
+      - web-[XXXXX]
   ```
 
-  This tells the deploy command which services to target with the build.
+  This tells the deploy command which services to target with the build.  You can get the value for the `[XXXXX]` bit by running `g3a services list`.
 
 * `gondor.yml` learned `buildpack` to send to build (replacing `BUILDPACK_URL` environment variable)
 * `open` requires a service argument (only works with web services)
