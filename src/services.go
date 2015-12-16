@@ -34,7 +34,7 @@ func servicesCreateCmd(ctx *cli.Context) {
 	if err := api.Services.Create(&service); err != nil {
 		fatal(err.Error())
 	}
-	success(fmt.Sprintf("%s service has been created.", service.Kind))
+	success(fmt.Sprintf("%s service has been created.", *service.Kind))
 }
 
 func servicesListCmd(ctx *cli.Context) {
