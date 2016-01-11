@@ -1,5 +1,12 @@
 # ChangeLog
 
+## 0.7.1
+
+### Bug fixes
+
+* `gondor.yml` handling is improved to work in cases when it does not exist
+* `sites init` works as adveristed
+
 ## 0.7
 
 This release updates the client to support Gondor 0.2.0. Due to the changes in
