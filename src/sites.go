@@ -59,14 +59,16 @@ func sitesInitCmd(ctx *cli.Context) {
 	}
 	serviceKind := "web"
 	service := gondor.Service{
-		Kind: &serviceKind,
+		Instance: instance.URL,
+		Name:     &serviceKind,
+		Kind:     &serviceKind,
 	}
 	if err := api.Services.Create(&service); err != nil {
 		fatal(err.Error())
 	}
 	sc := SiteConfig{
-		Identifier: fmt.Sprintf("%s/%s", resourceGroup.Name, site.Name),
-		Branches:   map[string]string{"master": "primary"},
+		Identifier: fmt.Sprintf("%s/%s", *resourceGroup.Name, *site.Name),
+		Branches:   map[string]string{"master": label},
 		Deploy: &DeployConfig{
 			Services: []string{*service.Name},
 		},
@@ -116,6 +118,7 @@ func sitesDeleteCmd(ctx *cli.Context) {
 	if err := api.Sites.Delete(*site.URL); err != nil {
 		fatal(err.Error())
 	}
+	success(fmt.Sprintf("%s site has been deleted.", *site.Name))
 }
 
 func sitesEnvCmd(ctx *cli.Context) {
