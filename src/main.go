@@ -870,35 +870,31 @@ func parseSiteIdentifier(value string) (string, string) {
 }
 
 func getResourceGroup(ctx *cli.Context, api *gondor.Client) *gondor.ResourceGroup {
-	var resourceGroup *gondor.ResourceGroup
-	var err error
 	if ctx.GlobalString("resource-group") != "" {
-		resourceGroup, err = api.ResourceGroups.GetByName(ctx.GlobalString("resource-group"))
+		resourceGroup, err := api.ResourceGroups.GetByName(ctx.GlobalString("resource-group"))
 		if err != nil {
 			fatal(err.Error())
 		}
-	} else {
-		var err error
-		if err = LoadSiteConfig(); err == nil {
-			resourceGroupName, _ := parseSiteIdentifier(siteCfg.Identifier)
-			resourceGroup, err = api.ResourceGroups.GetByName(resourceGroupName)
-			if err != nil {
-				fatal(err.Error())
-			}
-		} else if err != nil {
-			fatal(fmt.Sprintf("failed to load gondor.yml\n%s", err.Error()))
-		} else {
-			user, err := api.AuthenticatedUser()
-			if err != nil {
-				fatal(err.Error())
-			}
-			if user.ResourceGroup == nil {
-				fatal("you do not have a personal resource group.")
-			}
-			resourceGroup = user.ResourceGroup
-		}
+		return resourceGroup
 	}
-	return resourceGroup
+	if err := LoadSiteConfig(); err == nil {
+		resourceGroupName, _ := parseSiteIdentifier(siteCfg.Identifier)
+		resourceGroup, err := api.ResourceGroups.GetByName(resourceGroupName)
+		if err != nil {
+			fatal(err.Error())
+		}
+		return resourceGroup
+	} else if _, ok := err.(ErrConfigNotFound); !ok {
+		fatal(fmt.Sprintf("failed to load gondor.yml\n%s", err.Error()))
+	}
+	user, err := api.AuthenticatedUser()
+	if err != nil {
+		fatal(err.Error())
+	}
+	if user.ResourceGroup == nil {
+		fatal("you do not have a personal resource group.")
+	}
+	return user.ResourceGroup
 }
 
 func getSite(ctx *cli.Context, api *gondor.Client) *gondor.Site {

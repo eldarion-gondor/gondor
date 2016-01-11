@@ -15,6 +15,12 @@ import (
 
 const configFilename = "gondor.yml"
 
+type ErrConfigNotFound struct{}
+
+func (err ErrConfigNotFound) Error() string {
+	return "gondor.yml does not exist"
+}
+
 type GlobalConfig struct {
 	Version string `yaml:"version,omitempty"`
 	Client  struct {
@@ -150,7 +156,7 @@ func FindSiteConfig() (string, error) {
 
 func LoadSiteConfigFromFile(filename string, dst interface{}) error {
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		return fmt.Errorf("cannot find gondor.yml")
+		return ErrConfigNotFound{}
 	}
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
