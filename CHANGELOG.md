@@ -6,6 +6,7 @@
 
 * `gondor.yml` handling is improved to work in cases when it does not exist
 * `sites init` works as adveristed
+* `services list` displays web URL, if available
 
 ## 0.7
 

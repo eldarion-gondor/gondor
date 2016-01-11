@@ -45,13 +45,18 @@ func servicesListCmd(ctx *cli.Context) {
 		fatal(err.Error())
 	}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Kind", "Replicas", "State"})
+	table.SetHeader([]string{"Name", "Kind", "Replicas", "Web URL", "State"})
 	for i := range services {
 		service := services[i]
+		var webURL string
+		if service.WebURL != nil {
+			webURL = *service.WebURL
+		}
 		table.Append([]string{
 			*service.Name,
 			*service.Kind,
 			strconv.Itoa(*service.Replicas),
+			webURL,
 			*service.State,
 		})
 	}
