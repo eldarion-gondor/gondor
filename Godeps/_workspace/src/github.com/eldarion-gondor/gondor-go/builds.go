@@ -15,7 +15,7 @@ type BuildResource struct {
 
 type Build struct {
 	Site         *string `json:"site,omitempty"`
-	Service      *string `json:"service,omitempty"`
+	Instance     *string `json:"instance,omitempty"`
 	Label        *string `json:"label,omitempty"`
 	BuildpackURL *string `json:"buildpack_url,omitempty"`
 

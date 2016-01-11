@@ -51,6 +51,7 @@ func deployCmd(ctx *cli.Context) {
 	// 1. create a build
 	build := &gondor.Build{
 		Site:         site.URL,
+		Instance:     instance.URL,
 		Label:        &buildLabel,
 		BuildpackURL: &siteCfg.BuildpackURL,
 	}
