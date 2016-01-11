@@ -80,7 +80,7 @@ func sitesInitCmd(ctx *cli.Context) {
 	if err := ioutil.WriteFile(configFilename, buf, 0644); err != nil {
 		fatal(fmt.Sprintf("writing %s: %s", configFilename, err))
 	}
-	fmt.Printf("Wrote %s to your current directory.\nYour site is ready to be deployed. To deploy, run:\n\n\tg3a deploy primary master\n\nDon't forget to commit %s before deploying.\n", configFilename, configFilename)
+	fmt.Printf("Wrote %s to your current directory.\nYour site is ready to be deployed. To deploy, run:\n\n\tg3a deploy\n\nDon't forget to commit %s before deploying.\n", configFilename, configFilename)
 }
 
 func sitesCreateCmd(ctx *cli.Context) {
