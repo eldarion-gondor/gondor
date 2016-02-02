@@ -817,8 +817,10 @@ func (c *CLI) GetTLSConfig(ctx *cli.Context) *tls.Config {
 	if err != nil {
 		// warn user
 	} else {
-		pool = x509.NewCertPool()
-		pool.AddCert(caCert)
+		if caCert != nil {
+			pool = x509.NewCertPool()
+			pool.AddCert(caCert)
+		}
 	}
 	return &tls.Config{
 		RootCAs:            pool,
