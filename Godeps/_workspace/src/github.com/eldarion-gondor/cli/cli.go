@@ -26,15 +26,27 @@ type versionInfo struct {
 }
 
 type CLI struct {
-	Name    string
-	Version string
-	Author  string
-	Email   string
-	Usage   string
+	Name         string
+	LongName     string
+	Version      string
+	Author       string
+	Email        string
+	Usage        string
+	EnvVarPrefix string
 
 	Config *GlobalConfig
 
 	api *gondor.Client
+}
+
+func (c *CLI) Prepare() {
+	if c.Usage == "" {
+		c.Usage = fmt.Sprintf("command-line tool for interacting with the %s", c.LongName)
+	}
+	if c.EnvVarPrefix == "" {
+		c.EnvVarPrefix = strings.ToUpper(c.Name)
+	}
+	c.Config = &GlobalConfig{}
 }
 
 func (c *CLI) cmd(cmdFunc func(*CLI, *cli.Context)) func(*cli.Context) {
@@ -75,36 +87,39 @@ func (c *CLI) Run() {
 	app.Email = c.Email
 	app.Usage = c.Usage
 	app.EnableBashCompletion = true
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
+	app.Flags = []cli.Flag{}
+	if c.Config.Cloud == nil {
+		app.Flags = append(app.Flags, cli.StringFlag{
 			Name:   "cloud",
 			Value:  "",
 			Usage:  "cloud used for this invocation",
-			EnvVar: "GONDOR_CLOUD",
-		},
+			EnvVar: fmt.Sprintf("%s_CLOUD", c.EnvVarPrefix),
+		})
+	}
+	app.Flags = append(app.Flags,
 		cli.StringFlag{
 			Name:   "cluster",
 			Value:  "",
 			Usage:  "cluster used for this invocation",
-			EnvVar: "GONDOR_CLUSTER",
+			EnvVar: fmt.Sprintf("%s_CLUSTER", c.EnvVarPrefix),
 		},
 		cli.StringFlag{
 			Name:   "resource-group",
 			Value:  "",
 			Usage:  "resource group used for this invocation",
-			EnvVar: "GONDOR_RESOURCE_GROUP",
+			EnvVar: fmt.Sprintf("%s_RESOURCE_GROUP", c.EnvVarPrefix),
 		},
 		cli.StringFlag{
 			Name:   "site",
 			Value:  "",
 			Usage:  "site used for this invocation",
-			EnvVar: "GONDOR_SITE",
+			EnvVar: fmt.Sprintf("%s_SITE", c.EnvVarPrefix),
 		},
 		cli.BoolFlag{
 			Name:  "log-http",
 			Usage: "log HTTP interactions",
 		},
-	}
+	)
 	app.Action = func(ctx *cli.Context) {
 		c.checkVersion()
 		cli.ShowAppHelp(ctx)
@@ -112,17 +127,17 @@ func (c *CLI) Run() {
 	app.Commands = []cli.Command{
 		{
 			Name:   "login",
-			Usage:  "authenticate with a Gondor cluster",
+			Usage:  fmt.Sprintf("authenticate with the %s", c.LongName),
 			Action: c.cmd(loginCmd),
 		},
 		{
 			Name:   "logout",
-			Usage:  "invalidate any existing credentials with the Gondor cluster",
+			Usage:  fmt.Sprintf("invalidate any existing credentials with the %s", c.LongName),
 			Action: c.cmd(logoutCmd),
 		},
 		{
 			Name:   "upgrade",
-			Usage:  "upgrade the client to latest version supported by your cloud",
+			Usage:  fmt.Sprintf("upgrade the client to latest version supported by the %s", c.LongName),
 			Action: c.cmd(upgradeCmd),
 		},
 		{

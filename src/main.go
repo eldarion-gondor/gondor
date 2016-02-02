@@ -8,11 +8,12 @@ var version string
 
 func main() {
 	cli := gondorcli.CLI{
-		Name:    "gondor",
-		Version: version,
-		Author:  "Eldarion, Inc.",
-		Email:   "development@eldarion.com",
-		Usage:   "command-line tool for interacting with the Gondor API",
+		Name:     "gondor",
+		LongName: "Gondor cloud",
+		Version:  version,
+		Author:   "Eldarion, Inc.",
+		Email:    "development@eldarion.com",
 	}
+	cli.Prepare()
 	cli.Run()
 }

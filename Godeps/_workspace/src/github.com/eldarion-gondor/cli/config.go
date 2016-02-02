@@ -130,8 +130,12 @@ func (cfg *GlobalConfig) GetCurrentCloud() *Cloud {
 }
 
 func LoadGlobalConfig(c *CLI, ctx *cli.Context, root string) error {
-	c.Config = &GlobalConfig{
-		root: root,
+	if c.Config == nil {
+		c.Config = &GlobalConfig{
+			root: root,
+		}
+	} else {
+		c.Config.root = root
 	}
 	// create config directories if they do not exist
 	if _, err := os.Stat(root); os.IsNotExist(err) {
