@@ -1,8 +1,90 @@
 {
-	"ImportPath": ".",
+	"ImportPath": "github.com/eldarion-gondor/gondor",
 	"GoVersion": "go1.5",
 	"Packages": [
 		"./..."
 	],
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "github.com/bgentry/speakeasy",
+			"Rev": "bc4d2c24c846d7c64dbaffc5cf9a85f964430ff8"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Comment": "1.2.0-187-gc31a797",
+			"Rev": "c31a7975863e7810c92e2e288a9ab074f9a88f29"
+		},
+		{
+			"ImportPath": "github.com/eldarion-gondor/cli",
+			"Comment": "v0.7.1-8-g41f466a",
+			"Rev": "41f466a8fba1679d04a686f4eb6341401437f1eb"
+		},
+		{
+			"ImportPath": "github.com/eldarion-gondor/gondor-go",
+			"Rev": "9dcfa40311caa54eba935d1a926a4d3ed80f0ac4"
+		},
+		{
+			"ImportPath": "github.com/eldarion-gondor/piper",
+			"Rev": "18d30ae04448dde1f950359433a2886736a7c915"
+		},
+		{
+			"ImportPath": "github.com/flynn/flynn/pkg/attempt",
+			"Comment": "v20150912.0",
+			"Rev": "ec66a63e3e4fb4179f28dbf29c0a06ab8514ac19"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "1551221275a7bd42978745a376b2531f791d88f3"
+		},
+		{
+			"ImportPath": "github.com/inconshreveable/go-update",
+			"Rev": "f848a144bdfc3d6dc7669d4b026ecc7a42ed4575"
+		},
+		{
+			"ImportPath": "github.com/kardianos/osext",
+			"Rev": "345163ffe35aa66560a4cd7dddf00f3ae21c9fda"
+		},
+		{
+			"ImportPath": "github.com/kr/binarydist",
+			"Rev": "9955b0ab8708602d411341e55fffd7e0700f86bd"
+		},
+		{
+			"ImportPath": "github.com/kr/pty",
+			"Comment": "release.r56-25-g05017fc",
+			"Rev": "05017fcccf23c823bfdea560dcc958a136e54fb7"
+		},
+		{
+			"ImportPath": "github.com/mgutz/ansi",
+			"Rev": "22ddafb24adc4786c83841aa3021349818c898e4"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/go-homedir",
+			"Rev": "7d2d8c8a4e078ce3c58736ab521a40b37a504c52"
+		},
+		{
+			"ImportPath": "github.com/olekukonko/tablewriter",
+			"Rev": "1805332a9a6612da6603ccfdd99a036afb89cec6"
+		},
+		{
+			"ImportPath": "github.com/pivotal-golang/bytefmt",
+			"Rev": "eb6a478daea5cd564c230719240761a1a2ccc713"
+		},
+		{
+			"ImportPath": "github.com/skratchdot/open-golang/open",
+			"Rev": "c8748311a7528d0ba7330d302adbc5a677ef9c9e"
+		},
+		{
+			"ImportPath": "github.com/tj/go-spin",
+			"Comment": "1.0.0-9-g4bd47d3",
+			"Rev": "4bd47d3603b5c0460028794fbbf207f881088c08"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "c84e1f8e3a7e322d497cd16c0e8a13c7e127baf3"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "d466437aa4adc35830964cffc5b5f262c63ddcb4"
+		}
+	]
 }
