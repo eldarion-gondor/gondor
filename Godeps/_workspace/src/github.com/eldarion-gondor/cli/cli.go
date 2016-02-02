@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"runtime"
@@ -814,19 +813,17 @@ func (c *CLI) GetAPIClient(ctx *cli.Context) *gondor.Client {
 
 func (c *CLI) GetTLSConfig(ctx *cli.Context) *tls.Config {
 	var pool *x509.CertPool
-	if ctx.GlobalString("ca-cert") != "" {
-		pem, err := ioutil.ReadFile(ctx.GlobalString("ca-cert"))
-		if err != nil {
-			// warn user
-		} else {
-			pool = x509.NewCertPool()
-			if ok := pool.AppendCertsFromPEM(pem); !ok {
-				pool = nil
-				// warn user
-			}
-		}
+	caCert, err := c.Config.Cluster.GetCertificateAuthority()
+	if err != nil {
+		// warn user
+	} else {
+		pool = x509.NewCertPool()
+		pool.AddCert(caCert)
 	}
-	return &tls.Config{RootCAs: pool}
+	return &tls.Config{
+		RootCAs:            pool,
+		InsecureSkipVerify: c.Config.Cluster.InsecureSkipVerify,
+	}
 }
 
 func (c *CLI) GetHttpClient(ctx *cli.Context) *http.Client {

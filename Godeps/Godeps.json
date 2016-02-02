@@ -16,8 +16,8 @@
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/cli",
-			"Comment": "v0.7.1-10-g52b6200",
-			"Rev": "52b6200c30bfcd443846333808d3111fa12e422a"
+			"Comment": "v0.7.1-12-g31b8a59",
+			"Rev": "31b8a59758757a0dcae56caae906fcb2d38a1493"
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/gondor-go",
