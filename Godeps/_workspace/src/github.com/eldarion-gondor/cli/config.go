@@ -11,6 +11,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/codegangsta/cli"
 	"github.com/eldarion-gondor/gondor-go"
@@ -116,6 +117,7 @@ type GlobalConfig struct {
 
 	root   string
 	loaded bool
+	once   sync.Once
 }
 
 func (cfg *GlobalConfig) GetCloudByName(name string) (*Cloud, error) {
@@ -150,6 +152,7 @@ func (cfg *GlobalConfig) GetCurrentCloud() *Cloud {
 }
 
 func LoadGlobalConfig(c *CLI, ctx *cli.Context, root string) error {
+	var err error
 	if c.Config == nil {
 		c.Config = &GlobalConfig{
 			root: root,
@@ -157,79 +160,82 @@ func LoadGlobalConfig(c *CLI, ctx *cli.Context, root string) error {
 	} else {
 		c.Config.root = root
 	}
-	// create config directories if they do not exist
-	if _, err := os.Stat(root); os.IsNotExist(err) {
-		if err := os.Mkdir(root, 0700); err != nil {
-			return fmt.Errorf("failed to create %s: %s", root, err)
-		}
-	} else {
-		// identity.json
-		data, err := ioutil.ReadFile(path.Join(root, "identity.json"))
-		if err == nil {
-			if err := json.Unmarshal(data, &c.Config); err != nil {
-				return err
+	c.Config.once.Do(func() {
+		// create config directories if they do not exist
+		if _, err := os.Stat(root); os.IsNotExist(err) {
+			if err := os.Mkdir(root, 0700); err != nil {
+				err = fmt.Errorf("failed to create %s: %s", root, err)
+				return
 			}
 		} else {
-			if !os.IsNotExist(err) {
-				return err
+			// identity.json
+			data, err := ioutil.ReadFile(path.Join(root, "identity.json"))
+			if err == nil {
+				if err := json.Unmarshal(data, &c.Config); err != nil {
+					return
+				}
+			} else {
+				if !os.IsNotExist(err) {
+					return
+				}
+			}
+			// clouds.json
+			data, err = ioutil.ReadFile(path.Join(root, "clouds.json"))
+			if err == nil {
+				if err := json.Unmarshal(data, &c.Config); err != nil {
+					return
+				}
+			} else {
+				if !os.IsNotExist(err) {
+					return
+				}
 			}
 		}
-		// clouds.json
-		data, err = ioutil.ReadFile(path.Join(root, "clouds.json"))
-		if err == nil {
-			if err := json.Unmarshal(data, &c.Config); err != nil {
-				return err
+		if c.Config.Cloud == nil {
+			var cloud *Cloud
+			cloudName := ctx.GlobalString("cloud")
+			if cloudName != "" {
+				if cloud, err = c.Config.GetCloudByName(cloudName); err != nil {
+					return
+				}
+			} else {
+				cloud = c.Config.GetCurrentCloud()
+				if cloud == nil {
+					err = fmt.Errorf("current cloud not specified; use --cloud or set current-cloud in %s", path.Join(root, "clouds.json"))
+					return
+				}
 			}
-		} else {
-			if !os.IsNotExist(err) {
-				return err
-			}
+			c.Config.Cloud = cloud
 		}
-	}
-	if c.Config.Cloud == nil {
-		var err error
-		var cloud *Cloud
-		cloudName := ctx.GlobalString("cloud")
-		if cloudName != "" {
-			if cloud, err = c.Config.GetCloudByName(cloudName); err != nil {
-				return err
+		if c.Config.Cluster == nil {
+			var cluster *Cluster
+			clusterName := ctx.GlobalString("cluster")
+			if clusterName != "" {
+				if cluster, err = c.Config.Cloud.GetClusterByName(clusterName); err != nil {
+					return
+				}
+			} else {
+				cluster = c.Config.Cloud.GetCurrentCluster()
+				if cluster == nil {
+					err = fmt.Errorf("current cluster not specified; use --cluster or set current-cluster in %s of %s", c.Config.Cloud.Name, path.Join(root, "clouds.json"))
+					return
+				}
 			}
-		} else {
-			cloud = c.Config.GetCurrentCloud()
-			if cloud == nil {
-				return fmt.Errorf("current cloud not specified; use --cloud or set current-cloud in %s", path.Join(root, "clouds.json"))
-			}
+			c.Config.Cluster = cluster
 		}
-		c.Config.Cloud = cloud
-	}
-	if c.Config.Cluster == nil {
-		var err error
-		var cluster *Cluster
-		clusterName := ctx.GlobalString("cluster")
-		if clusterName != "" {
-			if cluster, err = c.Config.Cloud.GetClusterByName(clusterName); err != nil {
-				return err
+		if c.Config.Identity == nil {
+			var identity *Identity
+			for _, i := range c.Config.Identities {
+				if i.Provider == c.Config.Cloud.Identity.Location {
+					identity = i
+					break
+				}
 			}
-		} else {
-			cluster = c.Config.Cloud.GetCurrentCluster()
-			if cluster == nil {
-				return fmt.Errorf("current cluster not specified; use --cluster or set current-cluster in %s of %s", c.Config.Cloud.Name, path.Join(root, "clouds.json"))
-			}
+			c.Config.Identity = identity
 		}
-		c.Config.Cluster = cluster
-	}
-	if c.Config.Identity == nil {
-		var identity *Identity
-		for _, i := range c.Config.Identities {
-			if i.Provider == c.Config.Cloud.Identity.Location {
-				identity = i
-				break
-			}
-		}
-		c.Config.Identity = identity
-	}
-	c.Config.loaded = true
-	return nil
+		c.Config.loaded = true
+	})
+	return err
 }
 
 type clientConfigPersister struct {
@@ -312,7 +318,7 @@ type SiteConfig struct {
 
 	instances map[string]string
 
-	loaded   bool
+	once     sync.Once
 	filename string
 	vcs      VCSMetadata
 }
@@ -343,39 +349,41 @@ func LoadSiteConfigFromFile(filename string, dst interface{}) error {
 }
 
 func LoadSiteConfig() error {
-	filename, err := FindSiteConfig()
-	if err != nil {
-		return err
-	}
-	siteCfg.filename = filename
-	if err := LoadSiteConfigFromFile(filename, &siteCfg); err != nil {
-		return err
-	}
-	// git metadata
-	var branch string
-	output, err := exec.Command("git", "symbolic-ref", "HEAD").Output()
-	if err == nil {
-		bits := strings.Split(strings.TrimSpace(string(output)), "/")
-		if len(bits) == 3 {
-			branch = bits[2]
+	var err error
+	siteCfg.once.Do(func() {
+		filename, err := FindSiteConfig()
+		if err != nil {
+			return
 		}
-	}
-	var commit string
-	output, err = exec.Command("git", "rev-parse", branch).Output()
-	if err == nil {
-		commit = strings.TrimSpace(string(output))
-	}
-	siteCfg.vcs = VCSMetadata{
-		Branch: branch,
-		Commit: commit,
-	}
-	// reverse the branches mapping
-	siteCfg.instances = make(map[string]string)
-	for branch := range siteCfg.Branches {
-		siteCfg.instances[siteCfg.Branches[branch]] = branch
-	}
-	siteCfg.loaded = true
-	return nil
+		siteCfg.filename = filename
+		if err := LoadSiteConfigFromFile(filename, &siteCfg); err != nil {
+			return
+		}
+		// git metadata
+		var branch string
+		output, err := exec.Command("git", "symbolic-ref", "HEAD").Output()
+		if err == nil {
+			bits := strings.Split(strings.TrimSpace(string(output)), "/")
+			if len(bits) == 3 {
+				branch = bits[2]
+			}
+		}
+		var commit string
+		output, err = exec.Command("git", "rev-parse", branch).Output()
+		if err == nil {
+			commit = strings.TrimSpace(string(output))
+		}
+		siteCfg.vcs = VCSMetadata{
+			Branch: branch,
+			Commit: commit,
+		}
+		// reverse the branches mapping
+		siteCfg.instances = make(map[string]string)
+		for branch := range siteCfg.Branches {
+			siteCfg.instances[siteCfg.Branches[branch]] = branch
+		}
+	})
+	return err
 }
 
 func MustLoadSiteConfig() {
