@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/eldarion-gondor/cli"
+	"github.com/eldarion-gondor/cli/lib"
 )
 
 var version string

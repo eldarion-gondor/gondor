@@ -1,8 +1,8 @@
 {
 	"ImportPath": "github.com/eldarion-gondor/gondor",
-	"GoVersion": "go1.5",
+	"GoVersion": "go1.6",
 	"Packages": [
-		"./..."
+		"./src"
 	],
 	"Deps": [
 		{
@@ -15,13 +15,13 @@
 			"Rev": "c31a7975863e7810c92e2e288a9ab074f9a88f29"
 		},
 		{
-			"ImportPath": "github.com/eldarion-gondor/cli",
-			"Comment": "v0.7.1-16-gdd1fa84",
-			"Rev": "dd1fa84a1494be97530a027d8d975781fb7bc7f7"
+			"ImportPath": "github.com/eldarion-gondor/cli/lib",
+			"Comment": "v0.8.1",
+			"Rev": "97e550cb68ca405cb42a7274702e287d226d39fe"
 		},
 		{
-			"ImportPath": "github.com/eldarion-gondor/gondor-go",
-			"Rev": "9dcfa40311caa54eba935d1a926a4d3ed80f0ac4"
+			"ImportPath": "github.com/eldarion-gondor/gondor-go/lib",
+			"Rev": "234469a1898af4d4344f6ad087b3149ef07dfd2b"
 		},
 		{
 			"ImportPath": "github.com/eldarion-gondor/piper",
@@ -42,7 +42,7 @@
 		},
 		{
 			"ImportPath": "github.com/kardianos/osext",
-			"Rev": "345163ffe35aa66560a4cd7dddf00f3ae21c9fda"
+			"Rev": "8fef92e41e22a70e700a96b29f066cda30ea24ef"
 		},
 		{
 			"ImportPath": "github.com/kr/binarydist",
